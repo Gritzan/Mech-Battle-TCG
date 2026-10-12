@@ -28,56 +28,63 @@ header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px;b
 .sec h4{margin:10px 0 4px;font-size:13px;display:flex;justify-content:space-between;cursor:pointer}
 .th{display:flex;flex-wrap:wrap;gap:4px}.th .t{width:58px;font-size:8px;padding:2px}.th .bg{font-size:10px;line-height:14px;padding:0 4px}
 .cl{position:absolute;left:0;right:0;bottom:0;height:5px}
+#pv{position:fixed;width:260px;display:none;z-index:50;pointer-events:none;background:var(--pn);border:2px solid var(--ac);border-radius:10px;padding:6px;font-weight:700}
+#pv img{width:100%;display:block;border-radius:6px}
 </style></head><body>
 <header><b>MechBattle Deck Builder</b> <a href="index.html">Home</a> <a href="play.html">Play</a><span style="flex:1"></span>
 <select id="ld"><option value="">Saved decks…</option></select> <button data-a="load">Load</button> <button data-a="del">Delete</button> <button data-a="new">New deck</button></header>
 <div id="steps"></div>
 <div id="main"><div id="view">Loading cards…</div><aside id="side"></aside></div>
+<div id="pv"></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug=n=>String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
 const TM={mech:'mech',mothership:'mother',mother:'mother',commander:'cmd',cmd:'cmd',spec:'spec','spec part':'spec',part:'part',action:'action',deck:'deck',energy:'energy'};
 const ST=[{k:'mech',t:'Mech',n:1,max:1,ty:['mech']},{k:'mother',t:'Mothership',n:1,max:1,ty:['mother']},{k:'cmd',t:'Commander',n:1,max:1,ty:['cmd']},
  {k:'spec',t:'Spec Parts',n:5,max:1,ty:['spec']},{k:'deck',t:'Main Deck',n:40,max:3,ty:['part','action','deck']},{k:'energy',t:'Energy Deck',n:10,max:10,ty:['energy']}];
+const NOTE='<p style="border:1px solid #ca8a04;background:rgba(202,138,4,.12);border-radius:8px;padding:6px 10px">⚠ <b>Reminder:</b> you can only deploy up to <b>3 Spec Parts</b>, with a <b>TOTAL ENERGY COST</b> equal to or lower than your Mech\'s HP, and of <b>different types</b>.</p>';
 const COL={blue:'#2563eb',red:'#dc2626',green:'#16a34a',white:'#e5e7eb',purple:'#9333ea'};
 const empty=()=>({mech:[],mother:[],cmd:[],spec:[],deck:[],energy:[],x:''});
 let CAT=[],D=empty(),step=0,q='',dn='';
 const byn=(n,S)=>CAT.find(c=>c.name==n&&(!S||S.ty.includes(c.type)))||{name:n},cnt=(k,n)=>D[k].filter(x=>x==n).length;
 const SV=()=>{try{return JSON.parse(localStorage.getItem('mb_decks')||'{}')}catch{return{}}};
 const note=t=>{const m=$('#msg');if(m)m.textContent=t};
+const hidePv=()=>{$('#pv').style.display='none'};
+function showPv(el,c){const e=$('#pv'),r=el.getBoundingClientRect(),w=260,h=364;
+ e.innerHTML=`<img src="cards/${encodeURIComponent(c.image||slug(c.name)+'.webp')}" alt="${esc(c.name)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`;
+ e.style.left=(r.right+w+24<=innerWidth?r.right+8:Math.max(8,r.left-w-20))+'px';e.style.top=Math.max(8,Math.min(r.top-20,innerHeight-h-24))+'px';e.style.display='block'}
 function tile(c,bd,cls){const d=document.createElement('div');d.className='t '+(cls||'');d.title=c.name;d.innerHTML=`<span>${esc(c.name)}</span>`;
  const im=new Image();im.alt='';im.src='cards/'+encodeURIComponent(c.image||slug(c.name)+'.webp');im.onerror=()=>im.remove();d.append(im);
  if(c.color){const k=document.createElement('u');k.className='cl';k.style.background=COL[c.color]||'#888';d.append(k)}
- if(bd){const b=document.createElement('i');b.className='bg';b.textContent=bd;d.append(b)}return d}
+ if(bd){const b=document.createElement('i');b.className='bg';b.textContent=bd;d.append(b)}d.onmouseenter=()=>showPv(d,c);d.onmouseleave=hidePv;return d}
 function txt(){const L=k=>{const m={};D[k].forEach(n=>m[n]=(m[n]||0)+1);return Object.entries(m).map(([n,c])=>c+' '+n).join('\n')};
  return `Mech:\n${D.mech.join('\n')}\n\nMothership:\n${D.mother.join('\n')}\n\nCommander:\n${D.cmd.join('\n')}\n\nSpec Parts:\n${L('spec')}\n\nDeck:\n${L('deck')}\n\nEnergy:\n${L('energy')}\n`}
 const go=i=>{step=Math.max(0,Math.min(6,i));render();scrollTo(0,0)};
 const PAL=()=>[...new Set(CAT.map(c=>c.color).filter(Boolean))];
 const cc=(k,n)=>{const S=ST.find(s=>s.k==k);return(CAT.find(c=>c.name==n&&S.ty.includes(c.type))||{}).color||''};
 const base=()=>[...new Set(['mech','mother','cmd'].map(k=>D[k][0]&&cc(k,D[k][0])).filter(Boolean))];
-const cols=()=>{const b=base();return b.length==1&&D.x?[...b,D.x]:b};
+const cols=()=>base();
 const lock=(S,c)=>{if(step>2)return false;const u=new Set(['mech','mother','cmd'].filter(k=>k!=S.k).map(k=>D[k][0]&&cc(k,D[k][0])).filter(Boolean));u.add(c.color);return u.size>2};
-function prune(){if(base().length!=1)D.x='';const c=cols();if(c.length)['spec','deck'].forEach(k=>{D[k]=D[k].filter(n=>c.includes(cc(k,n)))})}
+function prune(){const c=cols();if(c.length)['spec','deck'].forEach(k=>{D[k]=D[k].filter(n=>c.includes(cc(k,n)))})}
 function add(S,c){const a=D[S.k];if(lock(S,c))return;
  if(S.n==1){const first=!a.length;D[S.k]=[c.name];prune();render();if(first)setTimeout(()=>go(step+1),250);return}
  if(a.length>=S.n||cnt(S.k,c.name)>=S.max)return;a.push(c.name);render()}
 function pick(v){const S=ST[step],a=D[S.k],miss=['mech','mother','cmd'].filter(k=>!D[k].length),gated=step>2&&step<5;
  if(gated&&miss.length){v.innerHTML=`<h3>${S.t}</h3><p>Choose your Mech, Mothership and Commander first: they decide your colors.</p><button data-a="back">Back</button>`;return}
- const b=base(),xs=gated&&b.length==1?`<p>Second color (optional): <select id="xc"><option value="">none</option>${PAL().filter(c=>c!=b[0]).map(c=>`<option${D.x==c?' selected':''}>${c}</option>`).join('')}</select></p>`:'';
- v.innerHTML=`<h3 style="margin:4px 0">${S.t} <small>${a.length}/${S.n}${S.n>1?' · max '+S.max+' per card':''}${gated?' · colors: '+cols().join(' + '):''}</small></h3>${xs}<input id="q" placeholder="Search…" value="${esc(q)}" style="max-width:260px"><div id="grid"></div><p><button data-a="back"${step?'':' disabled'}>Back</button> <button class="p" data-a="next"${a.length==S.n?'':' disabled'}>Next</button></p>`;
+ const xs=gated&&base().length==1?`<p style="color:var(--mu)">All your key cards are ${base()[0]}, so the rest of the deck is locked to that color. To play two colors, choose at least one of your Mech, Mothership or Commander in another color.</p>`:'';
+ v.innerHTML=`<h3 style="margin:4px 0">${S.t} <small>${a.length}/${S.n}${S.n>1?' · max '+S.max+' per card':''}${gated?' · colors: '+cols().join(' + '):''}</small></h3>${xs}${S.k=='spec'?NOTE:''}<input id="q" placeholder="Search…" value="${esc(q)}" style="max-width:260px"><div id="grid"></div><p><button data-a="back"${step?'':' disabled'}>Back</button> <button class="p" data-a="next"${a.length==S.n?'':' disabled'}>Next</button></p>`;
  const g=v.querySelector('#grid'),L=CAT.filter(c=>S.ty.includes(c.type)&&(!gated||cols().includes(c.color))&&c.name.toLowerCase().includes(q.toLowerCase()));
  if(!L.length)g.textContent=CAT.length?'No cards match.':'No cards found in cards.json.';
  L.forEach(c=>{const n=cnt(S.k,c.name),lk=lock(S,c),t=tile(c,n||'',n?'sel':(lk||(S.n>1&&a.length>=S.n)?'dis':''));if(lk)t.title=c.name+' (would exceed 2 colors)';t.onclick=()=>add(S,c);g.append(t)});
- if(xs)$('#xc').onchange=e=>{D.x=e.target.value;prune();render()};
- $('#q').oninput=e=>{q=e.target.value;render();const i=$('#q');i.focus();i.setSelectionRange(99,99)}}
+  $('#q').oninput=e=>{q=e.target.value;render();const i=$('#q');i.focus();i.setSelectionRange(99,99)}}
 function review(v){const bad=ST.filter(S=>D[S.k].length!=S.n);
  v.innerHTML=`<h3 style="margin:4px 0">Review &amp; export</h3>${bad.length?`<p style="color:#d92d20">Incomplete: ${bad.map(S=>`${S.t} (${D[S.k].length}/${S.n})`).join(', ')}. You can still export, but the game will warn you.</p>`:'<p style="color:#16a34a">Deck complete ✓</p>'}<textarea id="out" readonly rows="16">${esc(txt())}</textarea><p><button class="p" data-a="copy">Copy to clipboard</button> <button data-a="dl">Download .txt</button> <span id="msg"></span></p><p>Deck name <input id="dn" value="${esc(dn)}" placeholder="My deck" style="max-width:220px"> <button data-a="save">Save locally</button></p><p><button data-a="back">Back</button></p>`}
-function side(){const s=$('#side');s.innerHTML='<b>Your list</b><div style="margin:4px 0;color:var(--mu)">Colors: '+(cols().join(' + ')||'not set yet')+(cols().length==2?' 🔒':'')+'</div>';
+function side(){const s=$('#side');s.innerHTML='<b>Your list</b><div style="margin:4px 0;color:var(--mu)">Colors: '+(cols().join(' + ')||'not set yet')+(['mech','mother','cmd'].every(k=>D[k].length)?' 🔒':'')+'</div>';
  ST.forEach((S,i)=>{const sec=document.createElement('div');sec.className='sec';sec.innerHTML=`<h4 data-s="${i}"><span>${S.t}</span><span>${D[S.k].length}/${S.n}</span></h4>`;
   const th=document.createElement('div');th.className='th';
   [...new Set(D[S.k])].forEach(n=>{const c=cnt(S.k,n),t=tile(byn(n,S),c>1?'×'+c:'');t.title='Click to remove one: '+n;t.onclick=()=>{D[S.k].splice(D[S.k].indexOf(n),1);render()};th.append(t)});
   sec.append(th);s.append(sec)})}
-function render(){
+function render(){hidePv();
  $('#steps').innerHTML=ST.map((s,i)=>`<span class="st${i==step?' on':''}${D[s.k].length==s.n?' ok':''}" data-s="${i}">${i+1}. ${s.t}</span>`).join('')+`<span class="st${step==6?' on':''}" data-s="6">7. Review &amp; Export</span>`;
  const v=$('#view');step<6?pick(v):review(v);side()}
 function fill(){const o=SV(),l=$('#ld');l.innerHTML='<option value="">Saved decks…</option>';Object.keys(o).forEach(k=>{const e=document.createElement('option');e.value=k;e.textContent=k;l.append(e)})}

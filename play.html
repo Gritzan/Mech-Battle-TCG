@@ -55,8 +55,10 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 #rv .c{position:relative;font-size:13px;cursor:pointer}
 .ci{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px}
 .c.im b,.c.im i{visibility:hidden}
-#pv{position:fixed;right:8px;top:calc(60px + env(safe-area-inset-top,0px));width:240px;z-index:9990;display:none;pointer-events:none;background:var(--pn);border:2px solid var(--ac);border-radius:10px;padding:6px;font-weight:700}
+#pv{position:fixed;right:8px;top:calc(60px + env(safe-area-inset-top,0px));width:240px;z-index:10001;display:none;pointer-events:none;background:var(--pn);border:2px solid var(--ac);border-radius:10px;padding:6px;font-weight:700}
 #pv img{width:100%;display:block;border-radius:6px}
+.mb{width:min(560px,94%)}
+.mb .c{position:relative;flex:none;--w:72px;--h:100px;cursor:default}
 </style></head><body>
 
 <section id="deckscr" class="scr on"><div class="box">
@@ -151,21 +153,21 @@ function resolve(){if(rl==null)return;
 function pick(w){first=!!w;send({t:'f',w:w?1:0});afterPick()}
 function afterPick(){$('#fp').textContent=first?'You go first':'Opponent goes first';
  if(first)log('goes first');else{put(mk('Generic Energy','gen','token'),0);log('goes second and receives 1 Generic Energy')}
- for(let i=0;i<5&&me.main.length;i++)me.hand.push(me.main.shift());upd();mull()}
+ upd();pile('spec',()=>{for(let i=0;i<5&&me.main.length;i++)me.hand.push(me.main.shift());upd();mull()})}
 function mull(){const S={},ui=()=>{const ids=Object.keys(S),n=ids.length;
- modal('Mulligan',me.hand.map(c=>({t:c.name,b:[[S[c.id]?'✔ return':'return',()=>{if(S[c.id])delete S[c.id];else if(n<2)S[c.id]=1;ui()}]]})),
+ modal('Mulligan',me.hand.map(c=>({t:c.name,c,b:[[S[c.id]?'✔ return':'return',()=>{if(S[c.id])delete S[c.id];else if(n<2)S[c.id]=1;ui()}]]})),
  [[n?`Return ${n} and draw ${n}`:'Keep hand',()=>{ids.forEach(id=>me.main.push(me.hand.splice(me.hand.findIndex(c=>c.id==id),1)[0]));
-  for(let i=0;i<n&&me.main.length;i++)me.hand.push(me.main.shift());if(n)log(`mulliganed ${n} card(s)`);upd();pile('spec')}]],1,'Return up to 2 cards to the bottom of your deck; you draw the same number.')};ui()}
+  for(let i=0;i<n&&me.main.length;i++)me.hand.push(me.main.shift());if(n)log(`mulliganed ${n} card(s)`);upd();$('#modal').style.display='none'}]],1,'Return up to 2 cards to the bottom of your deck; you draw the same number.')};ui()}
 
-const pub=()=>({n:name,vp:me.vp,h:me.hand.length,m:me.main.length,e:me.energy.length,s:me.spec.length,d:me.discard.map(c=>c.name),x:me.exile.map(c=>c.name),f:me.field.map(c=>({type:c.type,a:c.a,x:c.x,y:c.y,tap:c.tap,fd:c.fd,z:c.z,dm:c.dm,sd:c.sd,en:c.en,lk:c.lk,name:c.fd?'?':c.name}))});
+const pub=()=>({n:name,vp:me.vp,h:me.hand.length,m:me.main.length,e:me.energy.length,s:me.spec.length,d:me.discard.map(c=>({name:c.name,type:c.type})),x:me.exile.map(c=>({name:c.name,type:c.type})),f:me.field.map(c=>({type:c.type,a:c.a,x:c.x,y:c.y,tap:c.tap,fd:c.fd,z:c.z,dm:c.dm,sd:c.sd,en:c.en,lk:c.lk,name:c.fd?'?':c.name}))});
 const send=o=>{if(link&&link.readyState=='open')link.send(JSON.stringify(o))};
 const sync=()=>send({t:'s',s:pub()});
 function addlog(m){const l=$('#log');l.insertAdjacentHTML('beforeend',`<div>${esc(m)}</div>`);l.scrollTop=l.scrollHeight}
 function log(m){m=name+' '+m;addlog(m);send({t:'l',m})}
 const upd=()=>{closeMenu();render();sync()};
 
-const lst=a=>Array.isArray(a)?a:[];
-const sy=a=>`<b>Scrapyard (${a.length})</b>${a.slice(0,3).map(n=>`<div>${esc(n)}</div>`).join('')}${a.length>3?`<div>+${a.length-3}…</div>`:''}`;
+const lst=a=>Array.isArray(a)?a:[],oc=n=>({t:String(n&&n.name||n),c:n&&typeof n=='object'?n:{name:String(n)}});
+const sy=a=>`<b>Scrapyard (${a.length})</b>${a.slice(0,3).map(n=>`<div>${esc(n&&n.name)}</div>`).join('')}${a.length>3?`<div>+${a.length-3}…</div>`:''}`;
 const slug=n=>String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
 let CAT=[];const CI={},nt=t=>({commander:'cmd',mothership:'mother',token:'drone'}[t]||t);
 const ent=(n,t)=>CI[t+'|'+String(n).toLowerCase()];
@@ -196,7 +198,7 @@ function renderOpp(){const b=$('#opbar'),o=opp;
  $('#osy').innerHTML=sy(lst(o&&o.d));drawBase($('#opf'),lst(o&&o.f),0);if(!dg)drawBF()}
 function render(){if(!me)return;
  $('#nm').textContent=me.main.length;$('#ne').textContent=me.energy.length;$('#ns').textContent=me.spec.length;$('#nd').textContent=me.discard.length;$('#nx').textContent=me.exile.length;$('#vp').textContent=me.vp+(me.vp>=5?' 🏆':'');
- $('#msy').innerHTML=sy(me.discard.map(c=>c.name));drawBase($('#myf'),me.field,1);
+ $('#msy').innerHTML=sy(me.discard);drawBase($('#myf'),me.field,1);
  const h=$('#hand');h.innerHTML='';
  me.hand.forEach(c=>{const d=cel(c,1);d.onclick=()=>menu(d,[['Play to field',()=>mv(c.id,'field')],['Play face-down',()=>mv(c.id,'field',1)],['Scrapyard',()=>mv(c.id,'discard')],['Remove from game',()=>mv(c.id,'exile')],...(c.src!='core'?[['Top of deck',()=>mv(c.id,c.src)],['Bottom of deck',()=>mv(c.id,c.src,'bottom')]]:[])]);h.append(d)});
  renderOpp()}
@@ -212,7 +214,7 @@ function drag(d,c,el){
  const m=document.createElement('u');m.className='mn';m.textContent='⋯';m.onpointerdown=e=>e.stopPropagation();m.onclick=e=>{e.stopPropagation();menu(d,fieldActs(c))};d.append(m);
  if(CK[c.type]){const q=document.createElement('u');q.className='ct';q.textContent='±';q.onpointerdown=e=>e.stopPropagation();q.onclick=e=>{e.stopPropagation();cp(d,c)};d.append(q)}
  d.oncontextmenu=e=>{e.preventDefault();menu(d,fieldActs(c))};
- d.onpointerdown=e=>{e.preventDefault();closeMenu();d.setPointerCapture(e.pointerId);dg=1;
+ d.onpointerdown=e=>{if(e.button!==0)return;e.preventDefault();closeMenu();d.setPointerCapture(e.pointerId);dg=1;
  const sx=e.clientX,sy=e.clientY,ox=c.x,oy=c.y,inbf=c.a>0;let moved=0;
  d.onpointermove=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>4)moved=1;if(!moved)return;
   if(inbf){const r=el.getBoundingClientRect(),fw=el.clientWidth-BF.cw,row=Math.max(0,Math.min(4,Math.floor((ev.clientY-r.top)/BF.bh)));
@@ -231,13 +233,14 @@ function cp(el,c){closeMenu();closeCp();const p=document.createElement('div');p.
  p.style.left=Math.max(4,Math.min(r.left,innerWidth-w-4))+'px';p.style.top=(r.top-h-4>4?r.top-h-4:Math.min(r.bottom+4,innerHeight-h-4))+'px'}
 function modal(title,rows,btns,lock,info){const m=$('#modal');m.style.display='flex';
  m.innerHTML=`<div class="mb"><div class="r"><b style="flex:1">${esc(title)}</b>${lock?'':'<button id="mx">Close</button>'}</div>${info?`<p>${esc(info)}</p>`:''}</div>`;const b=m.firstChild;
- rows.forEach((r,i)=>{const d=document.createElement('div');d.className='r';d.innerHTML=`<span>${r.b?i+1+'. ':''}${esc(r.t)}</span>`;(r.b||[]).forEach(([l,f])=>{const x=document.createElement('button');x.textContent=l;x.onclick=f;d.append(x)});b.append(d)});
+ rows.forEach((r,i)=>{const d=document.createElement('div');d.className='r';d.innerHTML=`<span>${r.b?i+1+'. ':''}${esc(r.t)}</span>`;if(r.c)d.prepend(cel({name:String(r.c.name),type:r.c.type,fd:0,tap:0},1));(r.b||[]).forEach(([l,f])=>{const x=document.createElement('button');x.textContent=l;x.onclick=f;d.append(x)});b.append(d)});
  if(!rows.length&&!info)b.append('Empty.');
  (btns||[]).forEach(([l,f])=>{const x=document.createElement('button');x.textContent=l;x.className='p';x.style.margin='8px 6px 0 0';x.onclick=f;b.append(x)});
  if(!lock){$('#mx').onclick=()=>m.style.display='none';m.onclick=e=>{if(e.target==m)m.style.display='none'}}else m.onclick=null}
-function pile(k){const T={discard:'Scrapyard',exile:'Removed from game',spec:'Spec Parts — choose which enter the field',main:'Deck (top first)',energy:'Energy Deck (top first)'},re=()=>pile(k),
+const SPEC='You can deploy up to 3 Spec Parts, with a TOTAL ENERGY COST equal to or lower than your Mech HP, and of different types.';
+function pile(k,done){const T={discard:'Scrapyard',exile:'Removed from game',spec:'Spec Parts — choose which enter the field',main:'Deck (top first)',energy:'Energy Deck (top first)'},re=()=>pile(k,done),
  O={discard:[['Field','field'],['Hand','hand'],['Remove','exile']],exile:[['Field','field'],['Hand','hand'],['Scrapyard','discard']]}[k]||[['Field','field'],['Hand','hand'],['Scrapyard','discard']];
- modal(T[k],me[k].map(c=>({t:c.name,b:O.map(([l,t])=>[l,()=>{mv(c.id,t);re()}])})));
+ modal(T[k],me[k].map(c=>({t:c.name,c,b:O.map(([l,t])=>[l,()=>{mv(c.id,t);re()}])})),done?[['Done',()=>{$('#modal').style.display='none';done()}]]:0,!!done,k=='spec'?SPEC:0);
  if(k=='main'||k=='energy'){const b=document.createElement('button');b.textContent='Shuffle and close';b.onclick=()=>{shuf(me[k]);log('shuffled the '+(k=='main'?'deck':'Energy Deck'));upd();$('#modal').style.display='none'};$('.mb').append(b)}}
 function showRv(c,who){const r=$('#rv'),w=document.createElement('div');w.className='rvw';
  const t=document.createElement('small');t.textContent=who+' reveals';
@@ -249,7 +252,7 @@ function peek(k,n){const lbl=k=='main'?'deck':'Energy Deck';n=Math.max(1,Math.mi
  log(`looks at the top ${ids.length} card(s) of the ${lbl}`);
  const ui=()=>{if(!ids.length){$('#modal').style.display='none';return}
   const go=(c,d)=>{ids.splice(ids.indexOf(c.id),1);if(d=='top')mv(c.id,k);else if(d=='bottom')mv(c.id,k,'bottom');else mv(c.id,d);ui()};
-  modal(`Top ${ids.length} of the ${lbl}`,ids.map(id=>me[k].find(c=>c.id==id)).filter(Boolean).map(c=>({t:c.name,b:[[shown[c.id]?'✔ Shown':'Show',()=>{shown[c.id]=1;log(`reveals ${c.name}`);send({t:'v',c:{name:c.name,type:c.type}});ui()}],['Top',()=>go(c,'top')],['Bottom',()=>go(c,'bottom')],['Hand',()=>go(c,'hand')],['Scrapyard',()=>go(c,'discard')]]})),0,0,'Show reveals a card to your opponent. Cards stay in the deck until you move them; cards sent to Top are stacked in the order you choose.')};
+  modal(`Top ${ids.length} of the ${lbl}`,ids.map(id=>me[k].find(c=>c.id==id)).filter(Boolean).map(c=>({t:c.name,c,b:[[shown[c.id]?'✔ Shown':'Show',()=>{shown[c.id]=1;log(`reveals ${c.name}`);send({t:'v',c:{name:c.name,type:c.type}});ui()}],['Top',()=>go(c,'top')],['Bottom',()=>go(c,'bottom')],['Hand',()=>go(c,'hand')],['Scrapyard',()=>go(c,'discard')]]})),0,0,'Show reveals a card to your opponent. Cards stay in the deck until you move them; cards sent to Top are stacked in the order you choose.')};
  ui()}
 const H={
  draw(){const n=Math.max(1,+$('#dn').value||1);let k=0;while(k<n&&me.main.length){me.hand.push(me.main.shift());k++}log(`drew ${k} card(s)`);upd()},
@@ -260,7 +263,7 @@ const H={
  drone(){const T=CAT.filter(e=>nt(e.type)=='drone');modal('Deploy a token',T.map(e=>({t:e.name,b:[['Deploy',()=>{put(mk(e.name,'drone','token'),0);log(`deployed ${e.name}`);upd()}]]})),0,0,T.length?'Tokens appear in Area 1. Use the ⋯ menu to remove one when it is gone.':'No tokens found in cards.json.')},
  vp1(){me.vp++;if(me.vp==5)log('reached 5 VP and won the game!');upd()},vp0(){me.vp=Math.max(0,me.vp-1);upd()},
  coin(){log('coin flip: '+(Math.random()<.5?'heads':'tails'))},
- od(){modal('Opponent Scrapyard',lst(opp&&opp.d).map(n=>({t:n})))},ox(){modal('Removed from game (opponent)',lst(opp&&opp.x).map(n=>({t:n})))},
+ od(){modal('Opponent Scrapyard',lst(opp&&opp.d).map(oc))},ox(){modal('Removed from game (opponent)',lst(opp&&opp.x).map(oc))},
  restart(e){const b=e.target;if(b.dataset.s){delete b.dataset.s;b.textContent='Restart';send({t:'x'});return newGame()}b.dataset.s=1;b.textContent='Confirm?';setTimeout(()=>{delete b.dataset.s;b.textContent='Restart'},3000)}};
 document.querySelectorAll('.bar').forEach(b=>b.onclick=e=>{const a=e.target.dataset.a;if(a&&H[a])H[a](e)});
 $('#msy').onclick=()=>me&&pile('discard');$('#osy').onclick=H.od;
