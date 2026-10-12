@@ -260,7 +260,7 @@ const H={
  she(){shuf(me.energy);log('shuffled the Energy Deck');upd()},
  en(){const c=me.energy[0];if(!c)return;log(`put ${c.name} into the field`);mv(c.id,'field')},
  vm(){peek('main',+$('#kn').value)},ve(){peek('energy',+$('#ke').value)},vs(){pile('spec')},vd(){pile('discard')},vx(){pile('exile')},
- drone(){const T=CAT.filter(e=>nt(e.type)=='drone');modal('Deploy a token',T.map(e=>({t:e.name,b:[['Deploy',()=>{put(mk(e.name,'drone','token'),0);log(`deployed ${e.name}`);upd()}]]})),0,0,T.length?'Tokens appear in Area 1. Use the ⋯ menu to remove one when it is gone.':'No tokens found in cards.json.')},
+ drone(){const T=CAT.filter(e=>nt(e.type)=='drone');modal('Deploy a token',T.map(e=>({t:e.name,c:{name:e.name,type:'drone'},b:[['Deploy',()=>{put(mk(e.name,'drone','token'),0);log(`deployed ${e.name}`);upd()}]]})),0,0,T.length?'Tokens appear in Area 1. Use the ⋯ menu to remove one when it is gone.':'No tokens found in cards.json.')},
  vp1(){me.vp++;if(me.vp==5)log('reached 5 VP and won the game!');upd()},vp0(){me.vp=Math.max(0,me.vp-1);upd()},
  coin(){log('coin flip: '+(Math.random()<.5?'heads':'tails'))},
  od(){modal('Opponent Scrapyard',lst(opp&&opp.d).map(oc))},ox(){modal('Removed from game (opponent)',lst(opp&&opp.x).map(oc))},

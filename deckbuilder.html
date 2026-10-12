@@ -42,6 +42,8 @@ const slug=n=>String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerC
 const TM={mech:'mech',mothership:'mother',mother:'mother',commander:'cmd',cmd:'cmd',spec:'spec','spec part':'spec',part:'part',action:'action',deck:'deck',energy:'energy'};
 const ST=[{k:'mech',t:'Mech',n:1,max:1,ty:['mech']},{k:'mother',t:'Mothership',n:1,max:1,ty:['mother']},{k:'cmd',t:'Commander',n:1,max:1,ty:['cmd']},
  {k:'spec',t:'Spec Parts',n:5,max:1,ty:['spec']},{k:'deck',t:'Main Deck',n:40,max:3,ty:['part','action','deck']},{k:'energy',t:'Energy Deck',n:10,max:10,ty:['energy']}];
+const isBasic=c=>c.type=='energy'&&!/\s/.test(c.name.trim());
+const eMax=(S,c)=>S.k=='energy'?(isBasic(c)?S.n:3):S.max;;
 const NOTE='<p style="border:1px solid #ca8a04;background:rgba(202,138,4,.12);border-radius:8px;padding:6px 10px">⚠ <b>Reminder:</b> you can only deploy up to <b>3 Spec Parts</b>, with a <b>TOTAL ENERGY COST</b> equal to or lower than your Mech\'s HP, and of <b>different types</b>.</p>';
 const COL={blue:'#2563eb',red:'#dc2626',green:'#16a34a',white:'#e5e7eb',purple:'#9333ea'};
 const empty=()=>({mech:[],mother:[],cmd:[],spec:[],deck:[],energy:[],x:''});
@@ -68,14 +70,14 @@ const lock=(S,c)=>{if(step>2)return false;const u=new Set(['mech','mother','cmd'
 function prune(){const c=cols();if(c.length)['spec','deck'].forEach(k=>{D[k]=D[k].filter(n=>c.includes(cc(k,n)))})}
 function add(S,c){const a=D[S.k];if(lock(S,c))return;
  if(S.n==1){const first=!a.length;D[S.k]=[c.name];prune();render();if(first)setTimeout(()=>go(step+1),250);return}
- if(a.length>=S.n||cnt(S.k,c.name)>=S.max)return;a.push(c.name);render()}
+ if(a.length>=S.n||cnt(S.k,c.name)>=eMax(S,c))return;a.push(c.name);render()}
 function pick(v){const S=ST[step],a=D[S.k],miss=['mech','mother','cmd'].filter(k=>!D[k].length),gated=step>2&&step<5;
  if(gated&&miss.length){v.innerHTML=`<h3>${S.t}</h3><p>Choose your Mech, Mothership and Commander first: they decide your colors.</p><button data-a="back">Back</button>`;return}
  const xs=gated&&base().length==1?`<p style="color:var(--mu)">All your key cards are ${base()[0]}, so the rest of the deck is locked to that color. To play two colors, choose at least one of your Mech, Mothership or Commander in another color.</p>`:'';
- v.innerHTML=`<h3 style="margin:4px 0">${S.t} <small>${a.length}/${S.n}${S.n>1?' · max '+S.max+' per card':''}${gated?' · colors: '+cols().join(' + '):''}</small></h3>${xs}${S.k=='spec'?NOTE:''}<input id="q" placeholder="Search…" value="${esc(q)}" style="max-width:260px"><div id="grid"></div><p><button data-a="back"${step?'':' disabled'}>Back</button> <button class="p" data-a="next"${a.length==S.n?'':' disabled'}>Next</button></p>`;
+ v.innerHTML=`<h3 style="margin:4px 0">${S.t} <small>${a.length}/${S.n}${S.n>1&&S.k!='energy'?' · max '+S.max+' per card':''}${S.k=='energy'?' · Basic: unlimited copies, non-Basic: max 3':''}${gated?' · colors: '+cols().join(' + '):''}</small></h3>${xs}${S.k=='spec'?NOTE:''}<input id="q" placeholder="Search…" value="${esc(q)}" style="max-width:260px"><div id="grid"></div><p><button data-a="back"${step?'':' disabled'}>Back</button> <button class="p" data-a="next"${a.length==S.n?'':' disabled'}>Next</button></p>`;
  const g=v.querySelector('#grid'),L=CAT.filter(c=>S.ty.includes(c.type)&&(!gated||cols().includes(c.color))&&c.name.toLowerCase().includes(q.toLowerCase()));
  if(!L.length)g.textContent=CAT.length?'No cards match.':'No cards found in cards.json.';
- L.forEach(c=>{const n=cnt(S.k,c.name),lk=lock(S,c),t=tile(c,n||'',n?'sel':(lk||(S.n>1&&a.length>=S.n)?'dis':''));if(lk)t.title=c.name+' (would exceed 2 colors)';t.onclick=()=>add(S,c);g.append(t)});
+ L.forEach(c=>{const n=cnt(S.k,c.name),lk=lock(S,c),full=n>=eMax(S,c),t=tile(c,n||'',full?'sel':(lk||(S.n>1&&a.length>=S.n)?'dis':''));if(lk)t.title=c.name+' (would exceed 2 colors)';t.onclick=()=>add(S,c);g.append(t)});
   $('#q').oninput=e=>{q=e.target.value;render();const i=$('#q');i.focus();i.setSelectionRange(99,99)}}
 function review(v){const bad=ST.filter(S=>D[S.k].length!=S.n);
  v.innerHTML=`<h3 style="margin:4px 0">Review &amp; export</h3>${bad.length?`<p style="color:#d92d20">Incomplete: ${bad.map(S=>`${S.t} (${D[S.k].length}/${S.n})`).join(', ')}. You can still export, but the game will warn you.</p>`:'<p style="color:#16a34a">Deck complete ✓</p>'}<textarea id="out" readonly rows="16">${esc(txt())}</textarea><p><button class="p" data-a="copy">Copy to clipboard</button> <button data-a="dl">Download .txt</button> <span id="msg"></span></p><p>Deck name <input id="dn" value="${esc(dn)}" placeholder="My deck" style="max-width:220px"> <button data-a="save">Save locally</button></p><p><button data-a="back">Back</button></p>`}
