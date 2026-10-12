@@ -1,111 +1,254 @@
 {
- "_help": "Card catalog. Key = card name. type: mech | mothership | commander | spec | part | action | energy. image (optional) overrides the default file cards/<name-as-slug>.webp. Replace these examples with your real cards.",
- "Example Mech 1": {
-  "type": "mech"
- },
- "Example Mech 2": {
-  "type": "mech"
- },
- "Example Mech 3": {
-  "type": "mech"
- },
- "Example Mothership 1": {
-  "type": "mothership"
- },
- "Example Mothership 2": {
-  "type": "mothership"
- },
- "Example Mothership 3": {
-  "type": "mothership"
- },
- "Example Commander 1": {
-  "type": "commander"
- },
- "Example Commander 2": {
-  "type": "commander"
- },
- "Example Commander 3": {
-  "type": "commander"
- },
- "Example Spec Part 1": {
-  "type": "spec"
- },
- "Example Spec Part 2": {
-  "type": "spec"
- },
- "Example Spec Part 3": {
-  "type": "spec"
- },
- "Example Spec Part 4": {
-  "type": "spec"
- },
- "Example Spec Part 5": {
-  "type": "spec"
- },
- "Example Spec Part 6": {
-  "type": "spec"
- },
- "Example Part 1": {
-  "type": "part"
- },
- "Example Part 2": {
-  "type": "part"
- },
- "Example Part 3": {
-  "type": "part"
- },
- "Example Part 4": {
-  "type": "part"
- },
- "Example Part 5": {
-  "type": "part"
- },
- "Example Part 6": {
-  "type": "part"
- },
- "Example Part 7": {
-  "type": "part"
- },
- "Example Part 8": {
-  "type": "part"
- },
- "Example Part 9": {
-  "type": "part"
- },
- "Example Part 10": {
-  "type": "part"
- },
- "Example Action 1": {
-  "type": "action"
- },
- "Example Action 2": {
-  "type": "action"
- },
- "Example Action 3": {
-  "type": "action"
- },
- "Example Action 4": {
-  "type": "action"
- },
- "Example Action 5": {
-  "type": "action"
- },
- "Example Action 6": {
-  "type": "action"
- },
- "Example Action 7": {
-  "type": "action"
- },
- "Example Action 8": {
-  "type": "action"
- },
- "Example Blue Energy": {
-  "type": "energy"
- },
- "Example Red Energy": {
-  "type": "energy"
- },
- "Example Green Energy": {
-  "type": "energy"
- }
+ "_help": "Card catalog generated from the spreadsheet. type: mech | mothership | commander | spec | part | action | energy | token. color is empty for energy and tokens. image (optional) overrides the default file cards/<name_as_slug>.webp.",
+ "cards": [
+  {"name": "Tactician", "type": "commander", "color": "blue"},
+  {"name": "Agressive", "type": "commander", "color": "red"},
+  {"name": "Visionary", "type": "commander", "color": "green"},
+  {"name": "Protector", "type": "commander", "color": "white"},
+  {"name": "Scavenger", "type": "commander", "color": "purple"},
+  {"name": "Pacifist", "type": "commander", "color": "blue"},
+  {"name": "Brawler", "type": "commander", "color": "red"},
+  {"name": "Engineer", "type": "commander", "color": "green"},
+  {"name": "Piercer", "type": "commander", "color": "white"},
+  {"name": "Pirate", "type": "commander", "color": "purple"},
+  {"name": "Spec Tesla Rifle", "type": "spec", "color": "blue"},
+  {"name": "Spec Tesla Whip", "type": "spec", "color": "blue"},
+  {"name": "Spec Tesla Cannon", "type": "spec", "color": "blue"},
+  {"name": "Spec Tesla Blade", "type": "spec", "color": "blue"},
+  {"name": "Scanner", "type": "spec", "color": "blue"},
+  {"name": "Particle Accelerator", "type": "spec", "color": "blue"},
+  {"name": "Analyzer", "type": "spec", "color": "blue"},
+  {"name": "Tesla Rails", "type": "spec", "color": "blue"},
+  {"name": "Laminated Plating", "type": "spec", "color": "blue"},
+  {"name": "Backup Battery", "type": "spec", "color": "blue"},
+  {"name": "EMP", "type": "spec", "color": "blue"},
+  {"name": "Spec Energy Shield", "type": "spec", "color": "blue"},
+  {"name": "Spec Beam Saber", "type": "spec", "color": "red"},
+  {"name": "Spec Tag Laser", "type": "spec", "color": "red"},
+  {"name": "Spec Beam Cannon", "type": "spec", "color": "red"},
+  {"name": "Spec Laser Edge Sword", "type": "spec", "color": "red"},
+  {"name": "Overheat Drones", "type": "spec", "color": "red"},
+  {"name": "Spec Boosters", "type": "spec", "color": "red"},
+  {"name": "Piercing Offensive", "type": "spec", "color": "red"},
+  {"name": "Gacha", "type": "spec", "color": "red"},
+  {"name": "Vibrating Armor", "type": "spec", "color": "red"},
+  {"name": "Spec Verniers", "type": "spec", "color": "red"},
+  {"name": "Lightweight Armor", "type": "spec", "color": "red"},
+  {"name": "Drone Sweep", "type": "spec", "color": "red"},
+  {"name": "Spec Metal Sword", "type": "spec", "color": "green"},
+  {"name": "Spec Broadblade", "type": "spec", "color": "green"},
+  {"name": "Spec Power Rifle", "type": "spec", "color": "green"},
+  {"name": "Spec Gauss Cannon", "type": "spec", "color": "green"},
+  {"name": "Battery", "type": "spec", "color": "green"},
+  {"name": "Spec Scope", "type": "spec", "color": "green"},
+  {"name": "Spec Reactor", "type": "spec", "color": "green"},
+  {"name": "Solar Panels", "type": "spec", "color": "green"},
+  {"name": "Spec Arm Mounted Shield", "type": "spec", "color": "green"},
+  {"name": "Spec Rechargeable Armor", "type": "spec", "color": "green"},
+  {"name": "Extra Plating", "type": "spec", "color": "green"},
+  {"name": "Turtle", "type": "spec", "color": "green"},
+  {"name": "Spec Thermo Sword", "type": "spec", "color": "white"},
+  {"name": "Spec Precision Rifle", "type": "spec", "color": "white"},
+  {"name": "Spec Shield and Rifle", "type": "spec", "color": "white"},
+  {"name": "Spec Gunblade", "type": "spec", "color": "white"},
+  {"name": "Spec Shield Drones Bay", "type": "spec", "color": "white"},
+  {"name": "Spec Offensive Drones Bay", "type": "spec", "color": "white"},
+  {"name": "Drone Shielding", "type": "spec", "color": "white"},
+  {"name": "Assisted Boosting", "type": "spec", "color": "white"},
+  {"name": "Spec Plate Shield", "type": "spec", "color": "white"},
+  {"name": "High Quality Armor", "type": "spec", "color": "white"},
+  {"name": "Spec Reflective Surface", "type": "spec", "color": "white"},
+  {"name": "Spec Guardian Angel System", "type": "spec", "color": "white"},
+  {"name": "Spec Small Missile Bay", "type": "spec", "color": "purple"},
+  {"name": "Spec Electric Blades", "type": "spec", "color": "purple"},
+  {"name": "Repurposed Tesla Cannon", "type": "spec", "color": "purple"},
+  {"name": "Scrap Cannon", "type": "spec", "color": "purple"},
+  {"name": "Spec Recycling Computer", "type": "spec", "color": "purple"},
+  {"name": "Spec Mine Drones Bay", "type": "spec", "color": "purple"},
+  {"name": "Spec Aiming Computer", "type": "spec", "color": "purple"},
+  {"name": "Spec Recycler", "type": "spec", "color": "purple"},
+  {"name": "Linked Plating", "type": "spec", "color": "purple"},
+  {"name": "Scrap Scavenger", "type": "spec", "color": "purple"},
+  {"name": "Stolen Armor", "type": "spec", "color": "purple"},
+  {"name": "Scrap Powered Shield", "type": "spec", "color": "purple"},
+  {"name": "Spec Tesla Dagger", "type": "spec", "color": "blue"},
+  {"name": "Research Vessel", "type": "spec", "color": "blue"},
+  {"name": "Spec Magnectic Field", "type": "spec", "color": "blue"},
+  {"name": "Spec Beam Greatsword", "type": "spec", "color": "red"},
+  {"name": "Impactful Lasers", "type": "spec", "color": "red"},
+  {"name": "Restabilizer", "type": "spec", "color": "red"},
+  {"name": "Spec Mace", "type": "spec", "color": "green"},
+  {"name": "Disposable Battery", "type": "spec", "color": "green", "image": "disposable_battery_spec.webp"},
+  {"name": "Stabilizer", "type": "spec", "color": "green"},
+  {"name": "Spec Tesla Pistol", "type": "spec", "color": "white"},
+  {"name": "Fast Drone Control", "type": "spec", "color": "white"},
+  {"name": "Hardened Alloy", "type": "spec", "color": "white"},
+  {"name": "Mining Laser", "type": "spec", "color": "purple"},
+  {"name": "Recycling Plant", "type": "spec", "color": "purple"},
+  {"name": "Recycler Shield", "type": "spec", "color": "purple"},
+  {"name": "Preparation", "type": "action", "color": "blue"},
+  {"name": "Strategize", "type": "action", "color": "blue"},
+  {"name": "Deploy EMP Drone", "type": "action", "color": "blue"},
+  {"name": "Zap", "type": "action", "color": "blue"},
+  {"name": "Counteraction", "type": "action", "color": "blue"},
+  {"name": "One Step Ahead", "type": "action", "color": "blue"},
+  {"name": "Divert Energy", "type": "action", "color": "blue"},
+  {"name": "EMP Blast", "type": "action", "color": "blue"},
+  {"name": "Buying Time", "type": "action", "color": "blue"},
+  {"name": "EMP Explosion", "type": "action", "color": "blue"},
+  {"name": "Overheat", "type": "action", "color": "red"},
+  {"name": "Double Time", "type": "action", "color": "red"},
+  {"name": "Flight Mode", "type": "action", "color": "red"},
+  {"name": "Gamble", "type": "action", "color": "red"},
+  {"name": "Drone Overclock", "type": "action", "color": "red"},
+  {"name": "Beam Blast", "type": "action", "color": "red"},
+  {"name": "Beam Attack", "type": "action", "color": "red"},
+  {"name": "Superbeam", "type": "action", "color": "red"},
+  {"name": "Energy Saving", "type": "action", "color": "green"},
+  {"name": "Deploy Reactor Drone", "type": "action", "color": "green"},
+  {"name": "Energy Multiplying", "type": "action", "color": "green"},
+  {"name": "Carbon Hardening", "type": "action", "color": "green"},
+  {"name": "Heavy Munitions", "type": "action", "color": "green"},
+  {"name": "Shove", "type": "action", "color": "green"},
+  {"name": "Break Component", "type": "action", "color": "green"},
+  {"name": "Giga Impact", "type": "action", "color": "green"},
+  {"name": "Depower", "type": "action", "color": "white"},
+  {"name": "Deploy Movable Shied", "type": "action", "color": "white"},
+  {"name": "Emergency Repairs", "type": "action", "color": "green"},
+  {"name": "Counter Attack", "type": "action", "color": "white"},
+  {"name": "Supersonic Attack", "type": "action", "color": "white"},
+  {"name": "Deflect", "type": "action", "color": "white"},
+  {"name": "Swarm Tactics", "type": "action", "color": "white"},
+  {"name": "Drone Intelligence", "type": "action", "color": "white"},
+  {"name": "Knights of the Round", "type": "action", "color": "white"},
+  {"name": "Sabotage", "type": "action", "color": "purple"},
+  {"name": "Deploy Mine", "type": "action", "color": "purple"},
+  {"name": "An Eye for an Eye", "type": "action", "color": "purple"},
+  {"name": "Perfect Sabotage", "type": "action", "color": "purple"},
+  {"name": "Filthy Tactics", "type": "action", "color": "purple"},
+  {"name": "Flyswat", "type": "action", "color": "purple"},
+  {"name": "Overclock Systems", "type": "action", "color": "purple"},
+  {"name": "Lock On", "type": "action", "color": "purple"},
+  {"name": "Repurpose Metal", "type": "action", "color": "purple"},
+  {"name": "Lethality", "type": "action", "color": "purple"},
+  {"name": "Twin Beams", "type": "action", "color": "red"},
+  {"name": "Drone Bomb", "type": "action", "color": "red"},
+  {"name": "Martyr", "type": "action", "color": "white"},
+  {"name": "Ace Drone", "type": "action", "color": "white", "image": "ace_drone_action.webp"},
+  {"name": "Activate Funnel", "type": "action", "color": "white"},
+  {"name": "Deploy Emergency Energy", "type": "action", "color": "red"},
+  {"name": "Laser Blast", "type": "action", "color": "red"},
+  {"name": "Emergency Magnectic Field", "type": "action", "color": "blue"},
+  {"name": "Magnectic Field", "type": "action", "color": "blue"},
+  {"name": "Disengage", "type": "action", "color": "white"},
+  {"name": "Magnectic Debris", "type": "action", "color": "purple"},
+  {"name": "Scrap Volley", "type": "action", "color": "purple"},
+  {"name": "Extra Impact", "type": "action", "color": "green"},
+  {"name": "Staggering Strike", "type": "action", "color": "green"},
+  {"name": "Concentrate Force", "type": "action", "color": "green"},
+  {"name": "Tesla Rifle", "type": "part", "color": "blue"},
+  {"name": "Tesla Whip", "type": "part", "color": "blue"},
+  {"name": "Tesla Grenade Launcher", "type": "part", "color": "blue"},
+  {"name": "Tesla Cannon", "type": "part", "color": "blue"},
+  {"name": "Tesla Blade", "type": "part", "color": "blue"},
+  {"name": "Focused EMP", "type": "part", "color": "blue"},
+  {"name": "Long Range Focused EMP", "type": "part", "color": "blue"},
+  {"name": "EMP Drones Bay", "type": "part", "color": "blue"},
+  {"name": "EMP Drones Bay Mk.II", "type": "part", "color": "blue"},
+  {"name": "Energy Shield", "type": "part", "color": "blue"},
+  {"name": "Beam Saber", "type": "part", "color": "red"},
+  {"name": "Beam Rifle", "type": "part", "color": "red"},
+  {"name": "Tag Laser", "type": "part", "color": "red"},
+  {"name": "Beam Cannon", "type": "part", "color": "red"},
+  {"name": "Pack Rockets", "type": "part", "color": "red"},
+  {"name": "Laser Edge Sword", "type": "part", "color": "red"},
+  {"name": "Boosters", "type": "part", "color": "red"},
+  {"name": "Dubious Part", "type": "part", "color": "red"},
+  {"name": "Swift Drones Control Center", "type": "part", "color": "red"},
+  {"name": "Verniers", "type": "part", "color": "red"},
+  {"name": "Metal Sword", "type": "part", "color": "green"},
+  {"name": "Broadblade", "type": "part", "color": "green"},
+  {"name": "Power Rifle", "type": "part", "color": "green"},
+  {"name": "Gauss Cannon", "type": "part", "color": "green"},
+  {"name": "Disposable Battery", "type": "part", "color": "green", "image": "disposable_battery_part.webp"},
+  {"name": "Scope", "type": "part", "color": "green"},
+  {"name": "Specialized Hardpoint", "type": "part", "color": "green"},
+  {"name": "Reactor", "type": "part", "color": "green"},
+  {"name": "Nuclear Reactor", "type": "part", "color": "green"},
+  {"name": "Arm Mounted Shield", "type": "part", "color": "green"},
+  {"name": "Rechargeable Armor", "type": "part", "color": "green"},
+  {"name": "Thermo Sword", "type": "part", "color": "white"},
+  {"name": "Precision Rifle", "type": "part", "color": "white"},
+  {"name": "Shield Drones Bay", "type": "part", "color": "white"},
+  {"name": "Shield and Rifle", "type": "part", "color": "white"},
+  {"name": "Offensive Drones Bay", "type": "part", "color": "white"},
+  {"name": "Offensive Drones Bay Mk.II", "type": "part", "color": "white"},
+  {"name": "Plate Shield", "type": "part", "color": "white"},
+  {"name": "Reflective Surface", "type": "part", "color": "white"},
+  {"name": "Guardian Angel System", "type": "part", "color": "white"},
+  {"name": "Small Missile Bay", "type": "part", "color": "purple"},
+  {"name": "Large Missile Bay", "type": "part", "color": "purple"},
+  {"name": "Electric Blades", "type": "part", "color": "purple"},
+  {"name": "Scrap Bomb", "type": "part", "color": "purple"},
+  {"name": "Recycling Computer", "type": "part", "color": "purple"},
+  {"name": "Mine Drones Bay", "type": "part", "color": "purple"},
+  {"name": "Mine Drones Bay Mk.II", "type": "part", "color": "purple"},
+  {"name": "Recycler", "type": "part", "color": "purple", "image": "recycler_part.webp"},
+  {"name": "Aiming Computer (purple)", "type": "part", "color": "purple"},
+  {"name": "Scrap Shield", "type": "part", "color": "purple"},
+  {"name": "Gunblade", "type": "part", "color": "white"},
+  {"name": "Heat Rifle", "type": "part", "color": "red"},
+  {"name": "Recycler Cannon", "type": "part", "color": "purple"},
+  {"name": "Reactor Cannon", "type": "part", "color": "blue"},
+  {"name": "Buckler", "type": "part", "color": "white"},
+  {"name": "Aiming Computer (white)", "type": "part", "color": "white"},
+  {"name": "Beam Rifle Mk. II", "type": "part", "color": "red"},
+  {"name": "Repurposed Gauss Cannon", "type": "part", "color": "purple"},
+  {"name": "Sensor", "type": "part", "color": "blue"},
+  {"name": "Capacitor", "type": "part", "color": "green"},
+  {"name": "Sentry", "type": "mech", "color": "blue"},
+  {"name": "Attacker", "type": "mech", "color": "red"},
+  {"name": "Energizer", "type": "mech", "color": "green"},
+  {"name": "Defender", "type": "mech", "color": "white"},
+  {"name": "Scrapper", "type": "mech", "color": "purple"},
+  {"name": "Stunner", "type": "mech", "color": "blue"},
+  {"name": "Booster", "type": "mech", "color": "red"},
+  {"name": "Filter", "type": "mech", "color": "green"},
+  {"name": "Controller", "type": "mech", "color": "white"},
+  {"name": "Outlaw", "type": "mech", "color": "purple"},
+  {"name": "Laboratory", "type": "mothership", "color": "blue"},
+  {"name": "Corvette", "type": "mothership", "color": "red"},
+  {"name": "Fort", "type": "mothership", "color": "green"},
+  {"name": "Disruptor", "type": "mothership", "color": "white"},
+  {"name": "Recycler", "type": "mothership", "color": "purple", "image": "recycler_mothership.webp"},
+  {"name": "Battle Lab", "type": "mothership", "color": "blue"},
+  {"name": "Battleship", "type": "mothership", "color": "red"},
+  {"name": "Terrarium", "type": "mothership", "color": "green"},
+  {"name": "Paladin", "type": "mothership", "color": "white"},
+  {"name": "Junker", "type": "mothership", "color": "purple"},
+  {"name": "Blue", "type": "energy"},
+  {"name": "Red", "type": "energy"},
+  {"name": "White", "type": "energy"},
+  {"name": "Green", "type": "energy"},
+  {"name": "Purple", "type": "energy"},
+  {"name": "Blue Red", "type": "energy"},
+  {"name": "Blue White", "type": "energy"},
+  {"name": "Blue Green", "type": "energy"},
+  {"name": "Blue Purple", "type": "energy"},
+  {"name": "Red Purple", "type": "energy"},
+  {"name": "Red White", "type": "energy"},
+  {"name": "Red Green", "type": "energy"},
+  {"name": "White Purple", "type": "energy"},
+  {"name": "White Green", "type": "energy"},
+  {"name": "Purple Green", "type": "energy"},
+  {"name": "Shield Drone", "type": "token"},
+  {"name": "Shield Drone Mk.II", "type": "token"},
+  {"name": "EMP Drone", "type": "token"},
+  {"name": "Offensive Drone", "type": "token"},
+  {"name": "Offensive Drone Mk.II", "type": "token"},
+  {"name": "Reactor Drone", "type": "token"},
+  {"name": "Mine Drone", "type": "token"},
+  {"name": "Ace Drone", "type": "token", "image": "ace_drone_token.webp"},
+  {"name": "Energy Mine Drone", "type": "token"}
+ ]
 }

@@ -90,7 +90,7 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
   <span>Energy <b id="ne"></b> <button data-a="en">Put in field</button> <button data-a="she">Shuffle</button> · Look at top <input id="ke" type="number" value="2" min="1" max="10"> <button data-a="ve">Look</button></span>
   <span>Spec <b id="ns"></b> <button data-a="vs">Choose</button></span>
   <span>Scrapyard <b id="nd"></b> <button data-a="vd">View</button> · Removed <b id="nx"></b> <button data-a="vx">View</button></span>
-  <button data-a="drone">+ Drone</button>
+  <button data-a="drone">+ Token</button>
   <span>VP <button data-a="vp0">−</button> <b id="vp"></b> <button data-a="vp1">+</button> / 5</span>
   <span id="fp"></span> <button data-a="coin">Coin flip</button> <button data-a="restart">Restart</button>
  </div>
@@ -166,17 +166,19 @@ const upd=()=>{closeMenu();render();sync()};
 
 const lst=a=>Array.isArray(a)?a:[];
 const sy=a=>`<b>Scrapyard (${a.length})</b>${a.slice(0,3).map(n=>`<div>${esc(n)}</div>`).join('')}${a.length>3?`<div>+${a.length-3}…</div>`:''}`;
-const slug=n=>String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-const imgFor=n=>{const m=META[String(n).toLowerCase()];return 'cards/'+encodeURIComponent((m&&m.image)||slug(n)+'.webp')};
-const mty=n=>{const t=(META[n.toLowerCase()]||{}).type;return t=='part'||t=='action'?t:'deck'};
-fetch('cards.json').then(r=>r.json()).then(j=>{for(const k in j)if(k[0]!='_')META[k.toLowerCase()]=j[k]}).catch(()=>{});
+const slug=n=>String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+let CAT=[];const CI={},nt=t=>({commander:'cmd',mothership:'mother',token:'drone'}[t]||t);
+const ent=(n,t)=>CI[t+'|'+String(n).toLowerCase()];
+const imgFor=(n,t)=>{const e=ent(n,t);return 'cards/'+encodeURIComponent((e&&e.image)||slug(n)+'.webp')};
+const mty=n=>{const e=ent(n,'part')||ent(n,'action');return e?nt(e.type):'deck'};
+fetch('cards.json').then(r=>r.json()).then(j=>{CAT=j.cards||[];CAT.forEach(e=>{CI[nt(e.type)+'|'+String(e.name).toLowerCase()]=e})}).catch(()=>{});
 const pv=(c,own)=>{const e=$('#pv');if(c.fd&&!own){e.style.display='none';return}
- e.innerHTML=`<img src="${imgFor(c.name)}" alt="${esc(c.name)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`;e.style.display='block'};
+ e.innerHTML=`<img src="${imgFor(c.name,c.type)}" alt="${esc(c.name)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`;e.style.display='block'};
 function cel(c,own){const y=TY[c.type]||TY.deck,d=document.createElement('div');
  d.className='c'+(c.fd?' fd':'')+(own?' mine':' opp')+(c.tap?' tap':'');d.style.setProperty('--tc',y[1]);d.title=c.fd&&!own?'':c.name;
  const bd=Object.keys(CT).filter(k=>+c[k]>0).map(k=>`<em style="background:${CT[k][1]}" title="${CT[k][0]}">${CT[k][2]}${+c[k]|0}</em>`).join('');
  d.innerHTML=`<b>${esc(c.name)}</b><i>${y[0]}</i>${bd?`<div class="bd">${bd}</div>`:''}`;if(bd)d.classList.add('hc');
- if(!c.fd){const im=new Image();im.className='ci';im.alt='';im.src=imgFor(c.name);im.onload=()=>d.classList.add('im');im.onerror=()=>im.remove();d.prepend(im)}
+ if(!c.fd){const im=new Image();im.className='ci';im.alt='';im.src=imgFor(c.name,c.type);im.onload=()=>d.classList.add('im');im.onerror=()=>im.remove();d.prepend(im)}
  if(!c.fd||own){d.onmouseenter=()=>pv(c,own);d.onmouseleave=()=>{$('#pv').style.display='none'}}
  return d}
 function drawBF(){const bf=$('#bf');bf.querySelectorAll('.c').forEach(e=>e.remove());
@@ -255,7 +257,7 @@ const H={
  she(){shuf(me.energy);log('shuffled the Energy Deck');upd()},
  en(){const c=me.energy[0];if(!c)return;log(`put ${c.name} into the field`);mv(c.id,'field')},
  vm(){peek('main',+$('#kn').value)},ve(){peek('energy',+$('#ke').value)},vs(){pile('spec')},vd(){pile('discard')},vx(){pile('exile')},
- drone(){put(mk('Drone','drone','token'),0);log('created a Drone token');upd()},
+ drone(){const T=CAT.filter(e=>nt(e.type)=='drone');modal('Deploy a token',T.map(e=>({t:e.name,b:[['Deploy',()=>{put(mk(e.name,'drone','token'),0);log(`deployed ${e.name}`);upd()}]]})),0,0,T.length?'Tokens appear in Area 1. Use the ⋯ menu to remove one when it is gone.':'No tokens found in cards.json.')},
  vp1(){me.vp++;if(me.vp==5)log('reached 5 VP and won the game!');upd()},vp0(){me.vp=Math.max(0,me.vp-1);upd()},
  coin(){log('coin flip: '+(Math.random()<.5?'heads':'tails'))},
  od(){modal('Opponent Scrapyard',lst(opp&&opp.d).map(n=>({t:n})))},ox(){modal('Removed from game (opponent)',lst(opp&&opp.x).map(n=>({t:n})))},
