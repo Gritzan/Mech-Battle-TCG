@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MechBattle — Virtual Table</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f1f3f7;--pn:#fff;--tx:#1b1f27;--mu:#667085;--bd:#cbd2de;--ac:#2563eb;--fl:#e4e9f1}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1219;--pn:#1a1f2b;--tx:#e6e9f0;--mu:#98a2b3;--bd:#343c4e;--ac:#5b8def;--fl:#151a24}}
+:root[data-theme="dark"]{--bg:#0f1219;--pn:#1a1f2b;--tx:#e6e9f0;--mu:#98a2b3;--bd:#343c4e;--ac:#5b8def;--fl:#151a24}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,sans-serif}
+button{font:inherit;padding:4px 9px;border:1px solid var(--bd);background:var(--pn);color:var(--tx);border-radius:6px;cursor:pointer}
+button:hover{border-color:var(--ac)} button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+textarea,input{font:inherit;background:var(--pn);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:6px;width:100%}
+input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
+.scr{display:none;height:100%;overflow:auto} .scr.on{display:block} #game.on{display:flex;flex-direction:column;overflow:auto}
+.box{max-width:860px;margin:0 auto;padding:16px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.two textarea{height:110px;margin:6px 0;font-size:11px}
+.bar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:5px 8px;background:var(--pn);border-bottom:1px solid var(--bd);font-size:13px}
+.fld{flex:1;min-height:110px;position:relative;background:var(--fl);overflow:hidden;border-bottom:1px solid var(--bd)}
+#log{height:40px;overflow:auto;font-size:12px;color:var(--mu);padding:2px 8px;background:var(--pn)}
+#hand{display:flex;gap:6px;overflow-x:auto;padding:6px 8px;min-height:112px;background:var(--pn)}
+.c{position:absolute;width:var(--w,64px);height:var(--h,90px);border:2px solid var(--tc);border-radius:6px;background:var(--pn);padding:3px;font-size:10px;line-height:1.2;overflow:hidden;touch-action:none;user-select:none;display:flex;flex-direction:column;justify-content:space-between}
+.c i{color:var(--mu);font-style:normal;font-size:9px}
+.c.fd{background:repeating-linear-gradient(45deg,#2b3550 0 6px,#3a4668 6px 12px);color:transparent;border-color:#667}
+.c.fd i{color:transparent} .c.fd.mine{color:#fff} .c.fd.mine i{color:#cbd}
+.c.tap{transform:rotate(90deg)}
+#hand .c{position:relative;flex:none;cursor:pointer;touch-action:auto}
+
+#menu{position:fixed;z-index:9999;background:var(--pn);border:1px solid var(--bd);border-radius:8px;padding:4px;display:flex;flex-direction:column;gap:3px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9998}
+.mb{background:var(--pn);border-radius:10px;padding:12px;max-height:80%;overflow:auto;width:min(480px,94%)}
+.r{display:flex;gap:6px;align-items:center;padding:3px 0;border-bottom:1px solid var(--bd)} .r span{flex:1}
+#msg{color:#d92d20;font-size:13px;margin:6px 0}
+.base{height:158px;position:relative;background:var(--fl);overflow:hidden;border-bottom:1px solid var(--bd);--w:52px;--h:74px}
+.base .c{font-size:9px}
+#game>*{flex:none}
+#bf{flex:1 0 300px;position:relative;display:grid;grid-template-rows:repeat(5,1fr);overflow:hidden}
+.band{padding:1px 6px;font-size:10px;color:var(--mu);border-bottom:1px dashed var(--bd)} .band:nth-child(odd){background:rgba(127,127,127,.09)}
+.sy{position:absolute;top:6px;bottom:6px;width:88px;border:1px dashed var(--ac);border-radius:6px;padding:4px;font-size:11px;cursor:pointer;overflow:hidden;background:var(--pn);z-index:1}
+.mn{position:absolute;top:0;right:0;width:18px;height:16px;text-align:center;text-decoration:none;background:var(--ac);color:#fff;border-radius:0 3px 0 6px;cursor:pointer;font-size:11px;line-height:16px}
+.c.opp{cursor:default!important} .c.mine{cursor:grab} #hand .c{cursor:pointer}
+.bd{position:absolute;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:1px;padding:1px}
+.bd em{font-style:normal;color:#fff;font-weight:700;font-size:10px;border-radius:7px;padding:0 4px;line-height:13px}
+.c.hc i{visibility:hidden}
+.ct{position:absolute;top:0;left:0;width:18px;height:16px;text-align:center;text-decoration:none;background:#475467;color:#fff;border-radius:3px 0 6px 0;cursor:pointer;font-size:12px;line-height:16px}
+#cp{position:fixed;z-index:9999;background:var(--pn);border:1px solid var(--bd);border-radius:8px;padding:8px;box-shadow:0 4px 16px rgba(0,0,0,.3);min-width:230px}
+#cp .r b{min-width:22px;text-align:center}
+.mb .r{flex-wrap:wrap}
+#rv{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;z-index:10000;pointer-events:none;padding:6px}
+.rvw{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--pn);border:2px solid var(--ac);border-radius:8px;padding:4px 6px 6px;pointer-events:auto;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.rvw small{font-weight:700}
+#rv .c{position:relative;font-size:13px;cursor:pointer}
+.ci{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px}
+.c.im b,.c.im i{visibility:hidden}
+#pv{position:fixed;right:8px;top:calc(60px + env(safe-area-inset-top,0px));width:240px;z-index:9990;display:none;pointer-events:none;background:var(--pn);border:2px solid var(--ac);border-radius:10px;padding:6px;font-weight:700}
+#pv img{width:100%;display:block;border-radius:6px}
+</style></head><body>
+
+<section id="deckscr" class="scr on"><div class="box">
+<p><a href="index.html">← Home</a> · <a href="deckbuilder.html">Deck Builder</a></p>
+<h2>MechBattle — Virtual Table</h2>
+<p>Paste your list using sections (<code>Mech</code>, <code>Commander</code>, <code>Mothership</code>, <code>Energy</code>, <code>Spec Parts</code>, <code>Deck</code>) and lines like <code>3x Card Name</code>. Playset: 1 Mech, 1 Commander, 1 Mothership, a 10-card Energy Deck, a 5-card Spec Parts deck and a 40-card Deck (max. 3 copies of each Deck card).</p>
+<input id="pn" placeholder="Your name" maxlength="24">
+<select id="sv" style="margin-top:8px;width:100%;font:inherit;padding:6px;background:var(--pn);color:var(--tx);border:1px solid var(--bd);border-radius:6px"><option value="">Load a deck saved in the Deck Builder…</option></select>
+<textarea id="dl" rows="16" style="margin:8px 0" placeholder="Paste your card list here…"></textarea>
+<div id="msg"></div>
+<button id="ex">Load example</button> <label><input type="checkbox" id="ig"> skip validation</label> <button class="p" id="go">Build Playset and continue</button>
+</div></section>
+
+<section id="lobby" class="scr"><div class="box">
+<h2>Connect to your opponent</h2>
+<p>One player creates a room and shares the code or link; the other joins with it.</p>
+<div class="two">
+ <div><h3>Create room</h3><button id="host" class="p">Create room</button><div style="margin-top:8px">Room code</div><input id="room" readonly><div style="margin-top:8px">Link</div><input id="rlink" readonly></div>
+ <div><h3>Join room</h3><div>Room code</div><input id="jc" maxlength="6" placeholder="ABC123"><p><button id="join" class="p">Join</button></p></div>
+</div>
+<p><button id="solo">Play solo (test)</button> <span id="st"></span></p>
+</div></section>
+
+<section id="game" class="scr">
+ <div id="opbar" class="bar"></div>
+ <div id="opf" class="base"><div class="sy" id="osy" style="left:6px"></div></div>
+ <div id="bf"><div class="band">Area 5</div><div class="band">Area 4</div><div class="band">Area 3</div><div class="band">Area 2</div><div class="band">Area 1</div></div>
+ <div id="myf" class="base"><div class="sy" id="msy" style="right:6px"></div></div>
+ <div id="mybar" class="bar">
+  <span>Deck <b id="nm"></b> <button data-a="draw">Draw</button> <input id="dn" type="number" value="1" min="1" max="40" title="Cards to draw"> <button data-a="shuf">Shuffle</button> · Look at top <input id="kn" type="number" value="3" min="1" max="40"> <button data-a="vm">Look</button></span>
+  <span>Energy <b id="ne"></b> <button data-a="en">Put in field</button> <button data-a="she">Shuffle</button> · Look at top <input id="ke" type="number" value="2" min="1" max="10"> <button data-a="ve">Look</button></span>
+  <span>Spec <b id="ns"></b> <button data-a="vs">Choose</button></span>
+  <span>Scrapyard <b id="nd"></b> <button data-a="vd">View</button> · Removed <b id="nx"></b> <button data-a="vx">View</button></span>
+  <button data-a="drone">+ Drone</button>
+  <span>VP <button data-a="vp0">−</button> <b id="vp"></b> <button data-a="vp1">+</button> / 5</span>
+  <span id="fp"></span> <button data-a="coin">Coin flip</button> <button data-a="restart">Restart</button>
+ </div>
+ <div id="log"></div>
+ <div id="hand"></div>
+</section>
+<div id="rv"></div>
+<div id="pv"></div>
+<div id="modal"></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TY={mech:['Mech','#ef4444'],cmd:['Commander','#a855f7'],mother:['Mothership','#0ea5e9'],energy:['Energy','#eab308'],spec:['Spec Part','#22c55e'],deck:['Card','#94a3b8'],part:['Part','#10b981'],action:['Action','#f97316'],drone:['Drone','#14b8a6'],gen:['Generic Energy','#f59e0b']};
+const BW=52,BH=74,R=100,ZN=['hand','field','discard','exile','main','energy','spec'],MOV={mech:1,mother:1,drone:1};
+const SEC={mech:'mech',commander:'cmd',comandante:'cmd',mothership:'mother','nave-mãe':'mother',energy:'energy',energia:'energy','energy deck':'energy',spec:'spec','spec parts':'spec','spec parts deck':'spec',deck:'deck','main deck':'deck'};
+const NEED={mech:1,cmd:1,mother:1,energy:10,spec:5,deck:40};
+let META={},peer,me,opp,link,pc,decks,name='Player',uid=0,zc=1,lt=0,dg=0,BF={},rl,orl,first;
+const show=id=>document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==id));
+
+function parse(t){const L={mech:[],cmd:[],mother:[],energy:[],spec:[],deck:[]},err=[];let s='deck';
+ t.split('\n').forEach(l=>{l=l.trim();if(!l||l.startsWith('//'))return;
+  const h=l.replace(/[:\[\]]/g,'').trim().toLowerCase();
+  if(SEC[h]&&!/^\d/.test(l)){s=SEC[h];return}
+  const m=l.match(/^(\d+)\s*x?\s+(.+)$/i),n=m?+m[1]:1,nm=(m?m[2]:l).trim();
+  for(let i=0;i<n;i++)L[s].push(nm)});
+ for(const k in NEED)if(L[k].length!==NEED[k])err.push(`${k=='deck'?'Deck':TY[k][0]}: needs ${NEED[k]}, found ${L[k].length}`);
+ const c={};L.deck.forEach(n=>{const k=n.toLowerCase();c[k]=(c[k]||0)+1});
+ for(const k in c)if(c[k]>3)err.push(`"${k}" has ${c[k]} copies in the Deck (max. 3)`);
+ return{L,err}}
+
+const mk=(n,t,s)=>({id:'c'+(++uid),name:n,type:t,src:s,a:0,x:0,y:0,fd:0,tap:0,z:0,dm:0,sd:0,en:0,lk:0});
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}};
+const CT={dm:['Damage','#ef4444',''],sd:['Stability Damage','#16a34a',''],en:['Energized','#ca8a04','⚡'],lk:['Lock On','#2563eb','◎']},CK={mech:['dm','sd','lk'],mother:['dm','lk'],drone:['dm','lk'],deck:['en'],part:['en'],spec:['en']};
+const cl=v=>Math.max(0,Math.min(1,v)),ROW={cmd:0,spec:0,deck:0,energy:1,gen:1};
+function put(c,fd){c.fd=fd?1:0;c.tap=0;c.z=++zc;
+ if(MOV[c.type]){c.a=1;c.y=0;c.x=Math.min(1,.05+me.field.filter(f=>f.a==1).length*.1)}
+ else{c.a=0;c.y=ROW[c.type]??0;c.x=Math.min(1,me.field.filter(f=>f.a==0&&f.y==c.y).length*.07)}
+ me.field.push(c)}
+function newGame(){const D=decks;
+ me={vp:0,hand:[],field:[],discard:[],exile:[],main:D.deck.map(n=>mk(n,mty(n),'main')),energy:D.energy.map(n=>mk(n,'energy','energy')),spec:D.spec.map(n=>mk(n,'spec','spec'))};
+ shuf(me.main);shuf(me.energy);
+ ['mech','mother','cmd'].forEach(k=>D[k][0]&&put(mk(D[k][0],k,'core'),0));
+ rl=orl=first=null;$('#fp').textContent='';upd();rollUI()}
+function mv(id,to,pos){let f,i=-1;for(f of ZN){i=me[f].findIndex(c=>c.id==id);if(i>=0)break}
+ if(i<0)return;const c=me[f].splice(i,1)[0];c.fd=0;c.tap=0;c.dm=c.sd=c.en=c.lk=0;
+ if(c.src=='token'&&to!='field'){}else if(to=='field')put(c,pos);else if(to=='hand'||pos=='bottom')me[to].push(c);else me[to].unshift(c);
+ upd()}
+
+function rollUI(){modal('Who goes first?',[],[['Roll d20',doRoll]],1,'Each player rolls a d20. The winner chooses whether to go first.')}
+function doRoll(){rl=1+Math.random()*20|0;log(`rolled ${rl} on the d20`);send({t:'r',v:rl});if(!link){orl=1+Math.random()*20|0;addlog(`Opponent (simulated) rolled ${orl}`)}resolve()}
+function resolve(){if(rl==null)return;
+ if(orl==null)return modal('Waiting for the opponent to roll…',[],0,1,`You rolled ${rl}.`);
+ if(rl==orl){rl=orl=null;addlog('Tie! Roll again.');return rollUI()}
+ if(rl>orl)modal(`You won the roll (${rl} × ${orl})`,[],[['Go first',()=>pick(1)],['Go second',()=>pick(0)]],1,'The player going second starts with 1 Generic Energy token.');
+ else if(!link){first=false;afterPick()}
+ else modal(`Opponent won the roll (${orl} × ${rl})`,[],0,1,'Waiting for their choice…')}
+function pick(w){first=!!w;send({t:'f',w:w?1:0});afterPick()}
+function afterPick(){$('#fp').textContent=first?'You go first':'Opponent goes first';
+ if(first)log('goes first');else{put(mk('Generic Energy','gen','token'),0);log('goes second and receives 1 Generic Energy')}
+ for(let i=0;i<5&&me.main.length;i++)me.hand.push(me.main.shift());upd();mull()}
+function mull(){const S={},ui=()=>{const ids=Object.keys(S),n=ids.length;
+ modal('Mulligan',me.hand.map(c=>({t:c.name,b:[[S[c.id]?'✔ return':'return',()=>{if(S[c.id])delete S[c.id];else if(n<2)S[c.id]=1;ui()}]]})),
+ [[n?`Return ${n} and draw ${n}`:'Keep hand',()=>{ids.forEach(id=>me.main.push(me.hand.splice(me.hand.findIndex(c=>c.id==id),1)[0]));
+  for(let i=0;i<n&&me.main.length;i++)me.hand.push(me.main.shift());if(n)log(`mulliganed ${n} card(s)`);upd();pile('spec')}]],1,'Return up to 2 cards to the bottom of your deck; you draw the same number.')};ui()}
+
+const pub=()=>({n:name,vp:me.vp,h:me.hand.length,m:me.main.length,e:me.energy.length,s:me.spec.length,d:me.discard.map(c=>c.name),x:me.exile.map(c=>c.name),f:me.field.map(c=>({type:c.type,a:c.a,x:c.x,y:c.y,tap:c.tap,fd:c.fd,z:c.z,dm:c.dm,sd:c.sd,en:c.en,lk:c.lk,name:c.fd?'?':c.name}))});
+const send=o=>{if(link&&link.readyState=='open')link.send(JSON.stringify(o))};
+const sync=()=>send({t:'s',s:pub()});
+function addlog(m){const l=$('#log');l.insertAdjacentHTML('beforeend',`<div>${esc(m)}</div>`);l.scrollTop=l.scrollHeight}
+function log(m){m=name+' '+m;addlog(m);send({t:'l',m})}
+const upd=()=>{closeMenu();render();sync()};
+
+const lst=a=>Array.isArray(a)?a:[];
+const sy=a=>`<b>Scrapyard (${a.length})</b>${a.slice(0,3).map(n=>`<div>${esc(n)}</div>`).join('')}${a.length>3?`<div>+${a.length-3}…</div>`:''}`;
+const slug=n=>String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const imgFor=n=>{const m=META[String(n).toLowerCase()];return 'cards/'+encodeURIComponent((m&&m.image)||slug(n)+'.webp')};
+const mty=n=>{const t=(META[n.toLowerCase()]||{}).type;return t=='part'||t=='action'?t:'deck'};
+fetch('cards.json').then(r=>r.json()).then(j=>{for(const k in j)if(k[0]!='_')META[k.toLowerCase()]=j[k]}).catch(()=>{});
+const pv=(c,own)=>{const e=$('#pv');if(c.fd&&!own){e.style.display='none';return}
+ e.innerHTML=`<img src="${imgFor(c.name)}" alt="${esc(c.name)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`;e.style.display='block'};
+function cel(c,own){const y=TY[c.type]||TY.deck,d=document.createElement('div');
+ d.className='c'+(c.fd?' fd':'')+(own?' mine':' opp')+(c.tap?' tap':'');d.style.setProperty('--tc',y[1]);d.title=c.fd&&!own?'':c.name;
+ const bd=Object.keys(CT).filter(k=>+c[k]>0).map(k=>`<em style="background:${CT[k][1]}" title="${CT[k][0]}">${CT[k][2]}${+c[k]|0}</em>`).join('');
+ d.innerHTML=`<b>${esc(c.name)}</b><i>${y[0]}</i>${bd?`<div class="bd">${bd}</div>`:''}`;if(bd)d.classList.add('hc');
+ if(!c.fd){const im=new Image();im.className='ci';im.alt='';im.src=imgFor(c.name);im.onload=()=>d.classList.add('im');im.onerror=()=>im.remove();d.prepend(im)}
+ if(!c.fd||own){d.onmouseenter=()=>pv(c,own);d.onmouseleave=()=>{$('#pv').style.display='none'}}
+ return d}
+function drawBF(){const bf=$('#bf');bf.querySelectorAll('.c').forEach(e=>e.remove());
+ const bh=bf.clientHeight/5,ch=Math.max(30,Math.min(90,Math.floor(bh-6))),cw=Math.round(ch*.71),fw=bf.clientWidth-cw;BF={bh,cw,ch};
+ bf.style.setProperty('--w',cw+'px');bf.style.setProperty('--h',ch+'px');
+ const L=lst(opp&&opp.f).filter(c=>c&&c.a>=1&&c.a<=5).map(c=>[c,0]);
+ if(me)me.field.filter(c=>c.a>0).forEach(c=>L.push([c,1]));
+ L.sort((p,q)=>(p[1]*1e6+(p[0].z|0))-(q[1]*1e6+(q[0].z|0))).forEach(([c,own],i)=>{const d=cel(c,own),x=+c.x||0,r=own?5-c.a:(c.a|0)-1;
+  d.style.left=(own?x:1-x)*fw+'px';d.style.top=r*bh+(bh-ch)/2+'px';d.style.zIndex=i;bf.append(d);if(own)drag(d,c,bf)})}
+function drawBase(el,list,own){el.querySelectorAll('.c').forEach(e=>e.remove());const fw=el.clientWidth-BW-R,fh=el.clientHeight-BH;
+ list.filter(c=>c&&!(c.a>0)).sort((a,b)=>(a.z|0)-(b.z|0)).forEach((c,i)=>{const d=cel(c,own),x=+c.x||0,y=+c.y||0;
+  d.style.left=(own?x*fw:R+(1-x)*fw)+'px';d.style.top=(own?y:1-y)*fh+'px';d.style.zIndex=i;el.append(d);if(own)drag(d,c,el)})}
+function renderOpp(){const b=$('#opbar'),o=opp;
+ b.innerHTML=o?`<b>${esc(o.n)}</b><span>VP <b>${+o.vp}${o.vp>=5?' 🏆':''}</b></span><span>Hand ${+o.h}</span><span>Deck ${+o.m}</span><span>Energy ${+o.e}</span><span>Spec ${+o.s}</span><button data-a="od">Scrapyard</button><button data-a="ox">Removed (${lst(o.x).length})</button>`:'<span>Waiting for opponent…</span>';
+ $('#osy').innerHTML=sy(lst(o&&o.d));drawBase($('#opf'),lst(o&&o.f),0);if(!dg)drawBF()}
+function render(){if(!me)return;
+ $('#nm').textContent=me.main.length;$('#ne').textContent=me.energy.length;$('#ns').textContent=me.spec.length;$('#nd').textContent=me.discard.length;$('#nx').textContent=me.exile.length;$('#vp').textContent=me.vp+(me.vp>=5?' 🏆':'');
+ $('#msy').innerHTML=sy(me.discard.map(c=>c.name));drawBase($('#myf'),me.field,1);
+ const h=$('#hand');h.innerHTML='';
+ me.hand.forEach(c=>{const d=cel(c,1);d.onclick=()=>menu(d,[['Play to field',()=>mv(c.id,'field')],['Play face-down',()=>mv(c.id,'field',1)],['Scrapyard',()=>mv(c.id,'discard')],['Remove from game',()=>mv(c.id,'exile')],...(c.src!='core'?[['Top of deck',()=>mv(c.id,c.src)],['Bottom of deck',()=>mv(c.id,c.src,'bottom')]]:[])]);h.append(d)});
+ renderOpp()}
+
+function closeMenu(){const m=$('#menu');m&&m.remove()}
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#menu'))closeMenu();if(!e.target.closest('#cp'))closeCp()});
+function menu(el,acts){closeMenu();const m=document.createElement('div');m.id='menu';
+ acts.forEach(([l,f])=>{const b=document.createElement('button');b.textContent=l;b.onclick=f;m.append(b)});document.body.append(m);
+ const r=el.getBoundingClientRect(),h=m.offsetHeight,w=m.offsetWidth;
+ m.style.left=Math.max(4,Math.min(r.left,innerWidth-w-4))+'px';m.style.top=(r.top-h-4>4?r.top-h-4:Math.min(r.bottom+4,innerHeight-h-4))+'px'}
+const fieldActs=c=>c.src=='token'?[['Remove token',()=>mv(c.id,'discard')]]:[['Flip',()=>{c.fd^=1;upd()}],['To hand',()=>mv(c.id,'hand')],['Scrapyard',()=>mv(c.id,'discard')],['Remove from game',()=>mv(c.id,'exile')],...(c.src!='core'?[['Top of deck',()=>mv(c.id,c.src)],['Bottom of deck',()=>mv(c.id,c.src,'bottom')]]:[])];
+function drag(d,c,el){
+ const m=document.createElement('u');m.className='mn';m.textContent='⋯';m.onpointerdown=e=>e.stopPropagation();m.onclick=e=>{e.stopPropagation();menu(d,fieldActs(c))};d.append(m);
+ if(CK[c.type]){const q=document.createElement('u');q.className='ct';q.textContent='±';q.onpointerdown=e=>e.stopPropagation();q.onclick=e=>{e.stopPropagation();cp(d,c)};d.append(q)}
+ d.oncontextmenu=e=>{e.preventDefault();menu(d,fieldActs(c))};
+ d.onpointerdown=e=>{e.preventDefault();closeMenu();d.setPointerCapture(e.pointerId);dg=1;
+ const sx=e.clientX,sy=e.clientY,ox=c.x,oy=c.y,inbf=c.a>0;let moved=0;
+ d.onpointermove=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>4)moved=1;if(!moved)return;
+  if(inbf){const r=el.getBoundingClientRect(),fw=el.clientWidth-BF.cw,row=Math.max(0,Math.min(4,Math.floor((ev.clientY-r.top)/BF.bh)));
+   c.x=cl((ev.clientX-r.left-BF.cw/2)/fw);c.a=5-row;d.style.left=c.x*fw+'px';d.style.top=row*BF.bh+(BF.bh-BF.ch)/2+'px'}
+  else{const fw=el.clientWidth-BW-R,fh=el.clientHeight-BH;c.x=cl(ox+dx/fw);c.y=cl(oy+dy/(fh||1));d.style.left=c.x*fw+'px';d.style.top=c.y*fh+'px'}
+  c.z=++zc;d.style.zIndex=9999;if(Date.now()-lt>60){lt=Date.now();sync()}};
+ d.onpointerup=d.onpointercancel=()=>{d.onpointermove=d.onpointerup=d.onpointercancel=null;dg=0;if(moved){sync();renderOpp()}else{c.tap^=1;upd()}}}}
+function closeCp(){const p=$('#cp');p&&p.remove()}
+function cp(el,c){closeMenu();closeCp();const p=document.createElement('div');p.id='cp';p.innerHTML=`<b>${esc(c.name)}</b>`;
+ CK[c.type].forEach(k=>{const r=document.createElement('div');r.className='r';r.innerHTML=`<span style="color:${CT[k][1]}">● ${CT[k][0]}</span>`;
+  const v=document.createElement('b');v.textContent=c[k]|0;
+  const mb=(l,dl)=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>{c[k]=Math.max(0,(c[k]|0)+dl);v.textContent=c[k];upd()};return b};
+  r.append(mb('−',-1),v,mb('+',1));p.append(r)});
+ const ok=document.createElement('button');ok.className='p';ok.textContent='OK';ok.style.marginTop='6px';ok.onclick=closeCp;p.append(ok);document.body.append(p);
+ const r=el.getBoundingClientRect(),h=p.offsetHeight,w=p.offsetWidth;
+ p.style.left=Math.max(4,Math.min(r.left,innerWidth-w-4))+'px';p.style.top=(r.top-h-4>4?r.top-h-4:Math.min(r.bottom+4,innerHeight-h-4))+'px'}
+function modal(title,rows,btns,lock,info){const m=$('#modal');m.style.display='flex';
+ m.innerHTML=`<div class="mb"><div class="r"><b style="flex:1">${esc(title)}</b>${lock?'':'<button id="mx">Close</button>'}</div>${info?`<p>${esc(info)}</p>`:''}</div>`;const b=m.firstChild;
+ rows.forEach((r,i)=>{const d=document.createElement('div');d.className='r';d.innerHTML=`<span>${r.b?i+1+'. ':''}${esc(r.t)}</span>`;(r.b||[]).forEach(([l,f])=>{const x=document.createElement('button');x.textContent=l;x.onclick=f;d.append(x)});b.append(d)});
+ if(!rows.length&&!info)b.append('Empty.');
+ (btns||[]).forEach(([l,f])=>{const x=document.createElement('button');x.textContent=l;x.className='p';x.style.margin='8px 6px 0 0';x.onclick=f;b.append(x)});
+ if(!lock){$('#mx').onclick=()=>m.style.display='none';m.onclick=e=>{if(e.target==m)m.style.display='none'}}else m.onclick=null}
+function pile(k){const T={discard:'Scrapyard',exile:'Removed from game',spec:'Spec Parts — choose which enter the field',main:'Deck (top first)',energy:'Energy Deck (top first)'},re=()=>pile(k),
+ O={discard:[['Field','field'],['Hand','hand'],['Remove','exile']],exile:[['Field','field'],['Hand','hand'],['Scrapyard','discard']]}[k]||[['Field','field'],['Hand','hand'],['Scrapyard','discard']];
+ modal(T[k],me[k].map(c=>({t:c.name,b:O.map(([l,t])=>[l,()=>{mv(c.id,t);re()}])})));
+ if(k=='main'||k=='energy'){const b=document.createElement('button');b.textContent='Shuffle and close';b.onclick=()=>{shuf(me[k]);log('shuffled the '+(k=='main'?'deck':'Energy Deck'));upd();$('#modal').style.display='none'};$('.mb').append(b)}}
+function showRv(c,who){const r=$('#rv'),w=document.createElement('div');w.className='rvw';
+ const t=document.createElement('small');t.textContent=who+' reveals';
+ const d=cel({name:String(c.name).slice(0,80),type:c.type,fd:0,tap:0},1);d.style.setProperty('--w','110px');d.style.setProperty('--h','154px');
+ w.append(t,d);w.onclick=()=>w.remove();setTimeout(()=>w.remove(),25000);r.append(w)}
+function peek(k,n){const lbl=k=='main'?'deck':'Energy Deck';n=Math.max(1,Math.min(40,n|0||1));
+ const ids=me[k].slice(0,n).map(c=>c.id),shown={};
+ if(!ids.length)return modal('Top of the '+lbl,[],0,0,'Empty.');
+ log(`looks at the top ${ids.length} card(s) of the ${lbl}`);
+ const ui=()=>{if(!ids.length){$('#modal').style.display='none';return}
+  const go=(c,d)=>{ids.splice(ids.indexOf(c.id),1);if(d=='top')mv(c.id,k);else if(d=='bottom')mv(c.id,k,'bottom');else mv(c.id,d);ui()};
+  modal(`Top ${ids.length} of the ${lbl}`,ids.map(id=>me[k].find(c=>c.id==id)).filter(Boolean).map(c=>({t:c.name,b:[[shown[c.id]?'✔ Shown':'Show',()=>{shown[c.id]=1;log(`reveals ${c.name}`);send({t:'v',c:{name:c.name,type:c.type}});ui()}],['Top',()=>go(c,'top')],['Bottom',()=>go(c,'bottom')],['Hand',()=>go(c,'hand')],['Scrapyard',()=>go(c,'discard')]]})),0,0,'Show reveals a card to your opponent. Cards stay in the deck until you move them; cards sent to Top are stacked in the order you choose.')};
+ ui()}
+const H={
+ draw(){const n=Math.max(1,+$('#dn').value||1);let k=0;while(k<n&&me.main.length){me.hand.push(me.main.shift());k++}log(`drew ${k} card(s)`);upd()},
+ shuf(){shuf(me.main);log('shuffled the deck');upd()},
+ she(){shuf(me.energy);log('shuffled the Energy Deck');upd()},
+ en(){const c=me.energy[0];if(!c)return;log(`put ${c.name} into the field`);mv(c.id,'field')},
+ vm(){peek('main',+$('#kn').value)},ve(){peek('energy',+$('#ke').value)},vs(){pile('spec')},vd(){pile('discard')},vx(){pile('exile')},
+ drone(){put(mk('Drone','drone','token'),0);log('created a Drone token');upd()},
+ vp1(){me.vp++;if(me.vp==5)log('reached 5 VP and won the game!');upd()},vp0(){me.vp=Math.max(0,me.vp-1);upd()},
+ coin(){log('coin flip: '+(Math.random()<.5?'heads':'tails'))},
+ od(){modal('Opponent Scrapyard',lst(opp&&opp.d).map(n=>({t:n})))},ox(){modal('Removed from game (opponent)',lst(opp&&opp.x).map(n=>({t:n})))},
+ restart(e){const b=e.target;if(b.dataset.s){delete b.dataset.s;b.textContent='Restart';send({t:'x'});return newGame()}b.dataset.s=1;b.textContent='Confirm?';setTimeout(()=>{delete b.dataset.s;b.textContent='Restart'},3000)}};
+document.querySelectorAll('.bar').forEach(b=>b.onclick=e=>{const a=e.target.dataset.a;if(a&&H[a])H[a](e)});
+$('#msy').onclick=()=>me&&pile('discard');$('#osy').onclick=H.od;
+onresize=()=>render();
+
+let saved={};try{saved=JSON.parse(localStorage.getItem('mb')||'{}')}catch{}
+$('#pn').value=saved.n||'';$('#dl').value=saved.d||'';
+try{const o=JSON.parse(localStorage.getItem('mb_decks')||'{}');Object.keys(o).forEach(k=>{const e=document.createElement('option');e.value=k;e.textContent=k;$('#sv').append(e)});$('#sv').onchange=()=>{const v=o[$('#sv').value];if(v)$('#dl').value=v.text}}catch{}
+$('#ex').onclick=()=>{$('#dl').value='Mech:\nExample Mech\n\nCommander:\nExample Commander\n\nMothership:\nExample Mothership\n\nEnergy:\n5 Blue Energy\n5 Red Energy\n\nSpec Parts:\n'+[1,2,3,4,5].map(i=>'1 Spec Part '+i).join('\n')+'\n\nDeck:\n'+[...Array(13)].map((_,i)=>'3 Card '+(i+1)).join('\n')+'\n1 Card 14'};
+$('#go').onclick=()=>{const{L,err}=parse($('#dl').value);name=$('#pn').value.trim()||'Player';
+ if(err.length&&!$('#ig').checked){$('#msg').innerHTML=err.map(esc).join('<br>');return}
+ $('#msg').textContent='';decks=L;try{localStorage.setItem('mb',JSON.stringify({n:name,d:$('#dl').value}))}catch{}
+ me=null;show('lobby')};
+function start(){show('game');if(!me)newGame();else{render();sync()}}
+const rid=()=>Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
+function onMsg(raw){let m;try{m=typeof raw=='string'?JSON.parse(raw):raw}catch{return}if(!m)return;
+ if(m.t=='s'){opp=m.s;renderOpp()}else if(m.t=='l')addlog(m.m);else if(m.t=='r'){orl=Math.min(20,Math.max(1,+m.v|0));resolve()}else if(m.t=='f'){first=!m.w;afterPick()}else if(m.t=='x')newGame();else if(m.t=='v'&&m.c&&typeof m.c=='object')showRv(m.c,opp?String(opp.n).slice(0,24):'Opponent')}
+function wire(c){link={get readyState(){return c.open?'open':'closed'},send:s=>c.send(s)};
+ const go=()=>{$('#st').textContent='Connected!';start()};c.open?go():c.on('open',go);
+ c.on('data',onMsg);c.on('close',()=>addlog('Connection closed.'));c.on('error',e=>addlog('Connection error: '+e.type))}
+$('#host').onclick=()=>{try{const code=rid();peer=new Peer('mbt-'+code);
+ peer.on('open',()=>{$('#room').value=code;$('#rlink').value=location.origin+location.pathname+'?room='+code;$('#st').textContent='Room ready. Share the code or link and wait for your opponent…'});
+ peer.on('connection',wire);peer.on('error',e=>{$('#st').textContent='Error: '+e.type})}catch(e){$('#st').textContent='Error: '+e.message}};
+$('#join').onclick=()=>{const code=$('#jc').value.trim().toUpperCase();if(!code)return;try{peer=new Peer();
+ peer.on('open',()=>{$('#st').textContent='Connecting…';wire(peer.connect('mbt-'+code,{reliable:true}))});
+ peer.on('error',e=>{$('#st').textContent='Error: '+e.type})}catch(e){$('#st').textContent='Error: '+e.message}};
+$('#jc').value=(new URLSearchParams(location.search).get('room')||'').toUpperCase();
+$('#solo').onclick=start;
+</script></body></html>

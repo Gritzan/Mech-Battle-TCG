@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MechBattle — Deck Builder</title>
+<style>
+:root{box-sizing:border-box;--bg:#f1f3f7;--pn:#fff;--tx:#1b1f27;--mu:#667085;--bd:#cbd2de;--ac:#2563eb}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1219;--pn:#1a1f2b;--tx:#e6e9f0;--mu:#98a2b3;--bd:#343c4e;--ac:#5b8def}}
+:root[data-theme="dark"]{--bg:#0f1219;--pn:#1a1f2b;--tx:#e6e9f0;--mu:#98a2b3;--bd:#343c4e;--ac:#5b8def}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,sans-serif}
+a{color:var(--ac)}
+button,select,input,textarea{font:inherit;background:var(--pn);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:5px 10px}
+button{cursor:pointer}button:hover:not(:disabled){border-color:var(--ac)}button:disabled{opacity:.45;cursor:default}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+input,textarea{width:100%}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px;background:var(--pn);border-bottom:1px solid var(--bd)}
+#steps{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px}
+.st{padding:4px 12px;border:1px solid var(--bd);border-radius:14px;background:var(--pn);cursor:pointer;font-size:13px}
+.st.on{background:var(--ac);color:#fff;border-color:var(--ac)}.st.ok::after{content:' ✓'}
+#main{display:grid;grid-template-columns:1fr 330px;gap:14px;padding:0 12px 20px;align-items:start}
+@media(max-width:820px){#main{grid-template-columns:1fr}}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px}
+.t{position:relative;aspect-ratio:5/7;border:2px solid var(--bd);border-radius:8px;overflow:hidden;background:var(--pn);cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px;font-size:12px;font-weight:600}
+.t img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.t:hover{border-color:var(--ac)}.t.sel{border-color:#16a34a;box-shadow:0 0 0 2px #16a34a}.t.dis{opacity:.4;cursor:not-allowed}
+.bg{position:absolute;top:3px;right:3px;background:#16a34a;color:#fff;border-radius:10px;padding:0 6px;font:700 12px/18px system-ui;font-style:normal}
+#side{position:sticky;top:8px;background:var(--pn);border:1px solid var(--bd);border-radius:10px;padding:10px;max-height:calc(100vh - 16px);overflow:auto}
+.sec h4{margin:10px 0 4px;font-size:13px;display:flex;justify-content:space-between;cursor:pointer}
+.th{display:flex;flex-wrap:wrap;gap:4px}.th .t{width:58px;font-size:8px;padding:2px}.th .bg{font-size:10px;line-height:14px;padding:0 4px}
+</style></head><body>
+<header><b>MechBattle Deck Builder</b> <a href="index.html">Home</a> <a href="play.html">Play</a><span style="flex:1"></span>
+<select id="ld"><option value="">Saved decks…</option></select> <button data-a="load">Load</button> <button data-a="del">Delete</button> <button data-a="new">New deck</button></header>
+<div id="steps"></div>
+<div id="main"><div id="view">Loading cards…</div><aside id="side"></aside></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const slug=n=>String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const TM={mech:'mech',mothership:'mother',mother:'mother',commander:'cmd',cmd:'cmd',spec:'spec','spec part':'spec',part:'part',action:'action',deck:'deck',energy:'energy'};
+const ST=[{k:'mech',t:'Mech',n:1,max:1,ty:['mech']},{k:'mother',t:'Mothership',n:1,max:1,ty:['mother']},{k:'cmd',t:'Commander',n:1,max:1,ty:['cmd']},
+ {k:'spec',t:'Spec Parts',n:5,max:1,ty:['spec']},{k:'deck',t:'Main Deck',n:40,max:3,ty:['part','action','deck']},{k:'energy',t:'Energy Deck',n:10,max:10,ty:['energy']}];
+const empty=()=>({mech:[],mother:[],cmd:[],spec:[],deck:[],energy:[]});
+let CAT=[],D=empty(),step=0,q='',dn='';
+const byn=n=>CAT.find(c=>c.name==n)||{name:n},cnt=(k,n)=>D[k].filter(x=>x==n).length;
+const SV=()=>{try{return JSON.parse(localStorage.getItem('mb_decks')||'{}')}catch{return{}}};
+const note=t=>{const m=$('#msg');if(m)m.textContent=t};
+function tile(c,bd,cls){const d=document.createElement('div');d.className='t '+(cls||'');d.title=c.name;d.innerHTML=`<span>${esc(c.name)}</span>`;
+ const im=new Image();im.alt='';im.src='cards/'+encodeURIComponent(c.image||slug(c.name)+'.webp');im.onerror=()=>im.remove();d.append(im);
+ if(bd){const b=document.createElement('i');b.className='bg';b.textContent=bd;d.append(b)}return d}
+function txt(){const L=k=>{const m={};D[k].forEach(n=>m[n]=(m[n]||0)+1);return Object.entries(m).map(([n,c])=>c+' '+n).join('\n')};
+ return `Mech:\n${D.mech.join('\n')}\n\nMothership:\n${D.mother.join('\n')}\n\nCommander:\n${D.cmd.join('\n')}\n\nSpec Parts:\n${L('spec')}\n\nDeck:\n${L('deck')}\n\nEnergy:\n${L('energy')}\n`}
+const go=i=>{step=Math.max(0,Math.min(6,i));render();scrollTo(0,0)};
+function add(S,c){const a=D[S.k];
+ if(S.n==1){const first=!a.length;D[S.k]=[c.name];render();if(first)setTimeout(()=>go(step+1),250);return}
+ if(a.length>=S.n||cnt(S.k,c.name)>=S.max)return;a.push(c.name);render()}
+function pick(v){const S=ST[step],a=D[S.k];
+ v.innerHTML=`<h3 style="margin:4px 0">${S.t} <small>${a.length}/${S.n}${S.n>1?' · max '+S.max+' per card':''}</small></h3><input id="q" placeholder="Search…" value="${esc(q)}" style="max-width:260px"><div id="grid"></div><p><button data-a="back"${step?'':' disabled'}>Back</button> <button class="p" data-a="next"${a.length==S.n?'':' disabled'}>Next</button></p>`;
+ const g=v.querySelector('#grid'),L=CAT.filter(c=>S.ty.includes(c.type)&&c.name.toLowerCase().includes(q.toLowerCase()));
+ if(!L.length)g.textContent=CAT.length?'No cards match.':'No cards found in cards.json.';
+ L.forEach(c=>{const n=cnt(S.k,c.name),t=tile(c,n||'',n?'sel':(S.n>1&&a.length>=S.n?'dis':''));t.onclick=()=>add(S,c);g.append(t)});
+ $('#q').oninput=e=>{q=e.target.value;render();const i=$('#q');i.focus();i.setSelectionRange(99,99)}}
+function review(v){const bad=ST.filter(S=>D[S.k].length!=S.n);
+ v.innerHTML=`<h3 style="margin:4px 0">Review &amp; export</h3>${bad.length?`<p style="color:#d92d20">Incomplete: ${bad.map(S=>`${S.t} (${D[S.k].length}/${S.n})`).join(', ')}. You can still export, but the game will warn you.</p>`:'<p style="color:#16a34a">Deck complete ✓</p>'}<textarea id="out" readonly rows="16">${esc(txt())}</textarea><p><button class="p" data-a="copy">Copy to clipboard</button> <button data-a="dl">Download .txt</button> <span id="msg"></span></p><p>Deck name <input id="dn" value="${esc(dn)}" placeholder="My deck" style="max-width:220px"> <button data-a="save">Save locally</button></p><p><button data-a="back">Back</button></p>`}
+function side(){const s=$('#side');s.innerHTML='<b>Your list</b>';
+ ST.forEach((S,i)=>{const sec=document.createElement('div');sec.className='sec';sec.innerHTML=`<h4 data-s="${i}"><span>${S.t}</span><span>${D[S.k].length}/${S.n}</span></h4>`;
+  const th=document.createElement('div');th.className='th';
+  [...new Set(D[S.k])].forEach(n=>{const c=cnt(S.k,n),t=tile(byn(n),c>1?'×'+c:'');t.title='Click to remove one: '+n;t.onclick=()=>{D[S.k].splice(D[S.k].indexOf(n),1);render()};th.append(t)});
+  sec.append(th);s.append(sec)})}
+function render(){
+ $('#steps').innerHTML=ST.map((s,i)=>`<span class="st${i==step?' on':''}${D[s.k].length==s.n?' ok':''}" data-s="${i}">${i+1}. ${s.t}</span>`).join('')+`<span class="st${step==6?' on':''}" data-s="6">7. Review &amp; Export</span>`;
+ const v=$('#view');step<6?pick(v):review(v);side()}
+function fill(){const o=SV(),l=$('#ld');l.innerHTML='<option value="">Saved decks…</option>';Object.keys(o).forEach(k=>{const e=document.createElement('option');e.value=k;e.textContent=k;l.append(e)})}
+const H={back(){go(step-1)},next(){go(step+1)},
+ copy(){const t=txt();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>note('Copied!'),()=>{$('#out').select();document.execCommand('copy');note('Copied!')})},
+ dl(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt()],{type:'text/plain'}));a.download=(slug($('#dn').value)||'deck')+'.txt';a.click()},
+ save(){const n=$('#dn').value.trim();if(!n)return note('Enter a deck name first.');dn=n;const o=SV();o[n]={d:D,text:txt()};try{localStorage.setItem('mb_decks',JSON.stringify(o));note('Saved!');fill()}catch{note('Could not save (storage blocked).')}},
+ load(){const n=$('#ld').value,o=SV();if(!n||!o[n])return;D=Object.assign(empty(),JSON.parse(JSON.stringify(o[n].d)));dn=n;go(6)},
+ del(){const n=$('#ld').value,o=SV();if(!n||!confirm('Delete "'+n+'"?'))return;delete o[n];try{localStorage.setItem('mb_decks',JSON.stringify(o))}catch{}fill()},
+ new(){D=empty();dn='';go(0)}};
+document.addEventListener('click',e=>{const s=e.target.closest('[data-s]');if(s){go(+s.dataset.s);return}const a=e.target.dataset.a;if(a&&H[a])H[a]()});
+fill();
+fetch('cards.json').then(r=>r.json()).then(j=>{CAT=Object.keys(j).filter(k=>k[0]!='_').map(k=>({name:k,type:TM[String(j[k].type||'').toLowerCase()],image:j[k].image})).filter(c=>c.type);render()}).catch(()=>{CAT=[];render()});
+</script></body></html>

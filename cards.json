@@ -1,0 +1,111 @@
+{
+ "_help": "Card catalog. Key = card name. type: mech | mothership | commander | spec | part | action | energy. image (optional) overrides the default file cards/<name-as-slug>.webp. Replace these examples with your real cards.",
+ "Example Mech 1": {
+  "type": "mech"
+ },
+ "Example Mech 2": {
+  "type": "mech"
+ },
+ "Example Mech 3": {
+  "type": "mech"
+ },
+ "Example Mothership 1": {
+  "type": "mothership"
+ },
+ "Example Mothership 2": {
+  "type": "mothership"
+ },
+ "Example Mothership 3": {
+  "type": "mothership"
+ },
+ "Example Commander 1": {
+  "type": "commander"
+ },
+ "Example Commander 2": {
+  "type": "commander"
+ },
+ "Example Commander 3": {
+  "type": "commander"
+ },
+ "Example Spec Part 1": {
+  "type": "spec"
+ },
+ "Example Spec Part 2": {
+  "type": "spec"
+ },
+ "Example Spec Part 3": {
+  "type": "spec"
+ },
+ "Example Spec Part 4": {
+  "type": "spec"
+ },
+ "Example Spec Part 5": {
+  "type": "spec"
+ },
+ "Example Spec Part 6": {
+  "type": "spec"
+ },
+ "Example Part 1": {
+  "type": "part"
+ },
+ "Example Part 2": {
+  "type": "part"
+ },
+ "Example Part 3": {
+  "type": "part"
+ },
+ "Example Part 4": {
+  "type": "part"
+ },
+ "Example Part 5": {
+  "type": "part"
+ },
+ "Example Part 6": {
+  "type": "part"
+ },
+ "Example Part 7": {
+  "type": "part"
+ },
+ "Example Part 8": {
+  "type": "part"
+ },
+ "Example Part 9": {
+  "type": "part"
+ },
+ "Example Part 10": {
+  "type": "part"
+ },
+ "Example Action 1": {
+  "type": "action"
+ },
+ "Example Action 2": {
+  "type": "action"
+ },
+ "Example Action 3": {
+  "type": "action"
+ },
+ "Example Action 4": {
+  "type": "action"
+ },
+ "Example Action 5": {
+  "type": "action"
+ },
+ "Example Action 6": {
+  "type": "action"
+ },
+ "Example Action 7": {
+  "type": "action"
+ },
+ "Example Action 8": {
+  "type": "action"
+ },
+ "Example Blue Energy": {
+  "type": "energy"
+ },
+ "Example Red Energy": {
+  "type": "energy"
+ },
+ "Example Green Energy": {
+  "type": "energy"
+ }
+}
