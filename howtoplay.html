@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MechBattle — How to Play</title>
+<style>
+:root{box-sizing:border-box;--bg:#f1f3f7;--pn:#fff;--tx:#1b1f27;--mu:#667085;--bd:#cbd2de;--ac:#2563eb;--fl:#e4e9f1}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1219;--pn:#1a1f2b;--tx:#e6e9f0;--mu:#98a2b3;--bd:#343c4e;--ac:#5b8def;--fl:#151a24}}
+:root[data-theme="dark"]{--bg:#0f1219;--pn:#1a1f2b;--tx:#e6e9f0;--mu:#98a2b3;--bd:#343c4e;--ac:#5b8def;--fl:#151a24}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 system-ui,sans-serif}
+a{color:var(--ac)}
+header{display:flex;gap:10px;align-items:center;padding:8px 16px;background:var(--pn);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5}
+.wrap{display:grid;grid-template-columns:200px 1fr;gap:0;max-width:980px;margin:0 auto}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}}
+nav{position:sticky;top:49px;align-self:start;padding:16px 10px;font-size:13px;max-height:calc(100vh - 49px);overflow:auto}
+nav a{display:block;padding:4px 8px;border-radius:6px;color:var(--tx);text-decoration:none}
+nav a:hover{background:var(--fl)}
+main{padding:10px 20px 60px;min-width:0}
+section{padding-top:14px;margin-top:14px;border-top:1px solid var(--bd)}
+section:first-child{border-top:none}
+h1{font-size:28px;margin:10px 0 2px}
+h2{font-size:20px;margin:0 0 8px;scroll-margin-top:60px}
+.sub{color:var(--mu);margin-top:0}
+.card{background:var(--pn);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin:10px 0}
+ul{padding-left:20px;margin:6px 0}
+kbd{background:var(--fl);border:1px solid var(--bd);border-radius:4px;padding:0 5px;font:600 .9em monospace}
+/* field diagram */
+.field{display:grid;grid-template-rows:repeat(5,34px);border:1px solid var(--bd);border-radius:8px;overflow:hidden;max-width:420px;margin:10px 0}
+.row{display:flex;align-items:center;font-size:12px;color:var(--mu);padding:0 8px;border-bottom:1px dashed var(--bd)}
+.row:nth-child(odd){background:var(--fl)}.row:last-child{border-bottom:none}
+.row b{color:var(--tx);font-weight:700;margin-right:6px}
+.row.en{background:#fde68a22;border:1px dashed #ca8a04;color:#92400e}
+:root[data-theme="dark"] .row.en,@media(prefers-color-scheme:dark){.row.en{color:#fcd34d}}
+.bases{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:420px;margin-top:4px}
+.base{border:1px solid var(--bd);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--mu)}
+.base b{color:var(--tx)}
+/* card anatomy */
+.an{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin:10px 0}
+.mock{width:150px;height:210px;border-radius:10px;border:2px solid var(--bd);position:relative;background:var(--pn);flex:none;padding:6px;font-size:10px;font-weight:700}
+.mock .hp{position:absolute;top:6px;left:6px;background:#ef4444;color:#fff;border-radius:5px;padding:1px 5px}
+.mock .sb{position:absolute;top:6px;left:36px;background:#16a34a;color:#fff;border-radius:5px;padding:1px 5px}
+.mock .ec{position:absolute;top:6px;left:6px;background:#1b1f27;color:#fff;border-radius:5px;padding:1px 5px}
+.mock .cec{position:absolute;top:24px;left:6px;border-radius:5px;padding:1px 5px;color:#fff}
+.mock .ty{position:absolute;bottom:34px;left:6px;right:6px;color:var(--mu);font-weight:400;font-size:9px}
+.mock .nm{position:absolute;top:46px;left:6px;right:6px;font-size:12px}
+.mock .fx{position:absolute;bottom:6px;left:6px;right:6px;color:var(--mu);font-weight:400;font-size:9px;border-top:1px solid var(--bd);padding-top:4px}
+.mock .cl{position:absolute;inset:0;border-radius:8px;border:4px solid var(--c);pointer-events:none}
+.legend{flex:1;min-width:200px}
+.legend li{margin:3px 0}
+table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px}
+td,th{border:1px solid var(--bd);padding:5px 8px;text-align:left}
+th{background:var(--fl)}
+.kw{margin:4px 0}.kw b{color:var(--ac)}
+</style></head><body>
+<header><b>MechBattle</b> <a href="index.html">Home</a> <a href="play.html">Play</a> <a href="deckbuilder.html">Deck Builder</a></header>
+<div class="wrap">
+<nav id="nav"></nav>
+<main>
+<h1>How to Play</h1><p class="sub">Mech Battle Rulebook — Ver 2</p>
+
+<section id="context"><h2>Context</h2>
+<p>You're the General of a military faction and you command a small elite company composed of a Mothership and its Commander and a specialized Mech.</p>
+<p>You'll battle other similar companies over control of star systems. During combat, you'll strategically position your Mothership and Mech on the field, upgrade your Mech on the spot and battle for supremacy in a fast paced duel against your enemies.</p>
+</section>
+
+<section id="objective"><h2>Objective</h2>
+<div class="card">
+<p>The objective of the game is to reach <b>5 Victory Points</b> before your enemy does so.</p>
+<ul>
+<li>You gain <b>1 VP</b> each time you destroy your enemy's Mech.</li>
+<li>You gain <b>the amount of your enemy's VP</b> when you destroy their Mothership, with a minimum of 1.</li>
+<li>When you destroy your enemy's Mech and they don't have a Mothership, you gain <b>2 VP</b> instead.</li>
+<li>When you try to draw from an empty Deck, your enemy gains <b>1 VP</b>.</li>
+</ul>
+</div>
+</section>
+
+<section id="playset"><h2>Mounting your Playset</h2>
+<ul>
+<li><b>1 Mech</b>, <b>1 Commander</b> and <b>1 Mothership</b> card, with up to a maximum of <b>2 colors</b> combined.</li>
+<li>A <b>10-card Energy Deck</b>, with as many copies of Basic Energy cards as you want, and a maximum of 3 copies of each non-Basic Energy card.</li>
+<li>A <b>5-card Spec Parts Deck</b>, with a maximum of 1 copy of each card, of the same colors as your Mech, Commander and Mothership.</li>
+<li>A <b>40-card Deck</b>, with a maximum of 3 copies of each card, of the same colors as your Mech, Commander and Mothership.</li>
+</ul>
+<p>Build yours in the <a href="deckbuilder.html">Deck Builder</a>.</p>
+</section>
+
+<section id="field"><h2>The Field</h2>
+<p>The Battle Area has 5 spaces. Each player's Mech and Mothership start in the space closest to them; the Commander stays in the base zone with the Deck, Parts and Energy.</p>
+<div class="field">
+ <div class="row en"><b>Enemy base</b> Commander · Deck · Spec Parts · Hand</div>
+ <div class="row"><b>Area 5</b></div>
+ <div class="row"><b>Area 3</b> <span style="margin-left:auto">(middle)</span></div>
+ <div class="row"><b>Area 1</b> <span style="margin-left:auto">Allied start space</span></div>
+ <div class="row en"><b>Allied base</b> Commander · Deck · Spec Parts · Hand</div>
+</div>
+<div class="bases">
+ <div class="base"><b>Base zone</b> — Commander, Energy Deck/Area, Parts Area, Deck Area, Hand, Scrapyard</div>
+ <div class="base"><b>Battle Area</b> — where Mechs, Motherships and Drones move and fight, 1 space at a time</div>
+</div>
+<p class="sub">This matches the table in <a href="play.html">Play</a>: Area 1 is each player's start space, and Mechs, Motherships and Drones can move 1 space forward or back by tapping and dragging.</p>
+</section>
+
+<section id="types"><h2>Card Types</h2>
+
+<h3 id="mothership">Motherships</h3>
+<div class="an">
+<div class="mock"><span class="cl" style="--c:#0ea5e9"></span><span class="hp">HP</span><span class="nm">Name</span><span class="ty">Type</span><span class="fx">Effect</span></div>
+<ul class="legend">
+<li>Fields: <b>Color</b>, <b>Name</b>, <b>HP</b>, <b>Type</b>, <b>Effect</b>.</li>
+<li>Start the game in the battlefield, in the allied start space, side by side with your Mech.</li>
+<li>Have a passive, or an effect that requires tapping to activate.</li>
+<li>HP value is at the top-left corner.</li>
+<li>Move in the battlefield by tapping and moving 1 space forward or backward.</li>
+<li>When destroyed: remove them from the game, together with your Commander.</li>
+</ul>
+</div>
+
+<h3 id="commander">Commanders</h3>
+<div class="an">
+<div class="mock"><span class="cl" style="--c:#a855f7"></span><span class="nm">Name</span><span class="ty">Type</span><span class="fx">Effect</span></div>
+<ul class="legend">
+<li>Fields: <b>Color</b>, <b>Name</b>, <b>Type</b>, <b>Effect</b>.</li>
+<li>Start the game in the field, side by side with the Deck.</li>
+<li>Have a passive, or an effect that requires tapping to activate.</li>
+<li>When your Mothership is destroyed, remove your Commander from the game with it.</li>
+</ul>
+</div>
+
+<h3 id="mech">Mechs</h3>
+<div class="an">
+<div class="mock"><span class="cl" style="--c:#ef4444"></span><span class="hp">HP</span><span class="sb">SB</span><span class="nm">Name</span><span class="ty">Type · Hardpoints</span><span class="fx">Effect</span></div>
+<ul class="legend">
+<li>Fields: <b>Color</b>, <b>Name</b>, <b>Stability</b>, <b>HP</b>, <b>Hardpoints</b>, <b>Type</b>, <b>Effect</b>.</li>
+<li>Start the game in the battlefield, in the allied start space, side by side with your Mothership.</li>
+<li>Have a passive, or an effect that requires tapping to activate.</li>
+<li>HP at the top-left corner; Stability (green) at its side.</li>
+<li>Hardpoints define how many non-Spec Parts it can have attached at once.</li>
+<li>Move in the battlefield by tapping and moving 1 space forward or backward.</li>
+<li><b>Destroyed</b> (HP reaches 0): destroy one attached non-Spec Part (or a Spec Part if you have no non-Spec Parts attached), then redeploy the Mech at the start of your next Turn, at your Mothership's space (or the Allied start space if you have no Mothership).</li>
+<li><b>Staggered</b> (Stability reaches 0): tap it and all its Parts, then Stun one of them. The next time it would take HP damage this turn, it takes double damage.</li>
+</ul>
+</div>
+
+<h3 id="spec">Spec Parts</h3>
+<div class="an">
+<div class="mock"><span class="cl" style="--c:#22c55e"></span><span class="ec">EC</span><span class="nm" style="top:26px">Name</span><span class="ty">Part Type</span><span class="fx">Ability</span></div>
+<ul class="legend">
+<li>Fields: <b>Color</b>, <b>Name</b>, <b>Part Type and Energy Cost</b>, <b>Type</b>, <b>Ability</b>.</li>
+<li>You start the match with Spec Parts whose total Energy Cost is equal to or lower than your Mech's HP, and of different Part Types, attached to your Mech.</li>
+<li>Have a passive, or an effect that requires tapping to activate.</li>
+<li>If you redeploy your Mech and 1 or more Spec Parts were destroyed, you may pay their Energy Cost to reattach them during redeploy.</li>
+</ul>
+</div>
+
+<h3 id="part">Parts</h3>
+<div class="an">
+<div class="mock"><span class="cl" style="--c:#10b981"></span><span class="ec">EC</span><span class="cec" style="background:#2563eb">●EC</span><span class="nm" style="top:42px">Name</span><span class="ty">Type</span><span class="fx">Effect</span></div>
+<ul class="legend">
+<li>Fields: <b>Color</b>, <b>Name</b>, <b>Total Energy Cost</b> (white), <b>Colored EC</b> below it, <b>Type</b>, <b>Effect</b>.</li>
+<li>Example: <i>Beam Saber</i> has Total Energy Cost 1, of which 1 must be Red — pay 1 Red Energy to attach it.</li>
+<li>Have a passive, or an effect that requires tapping to activate. Attach untapped, and can tap the turn they enter.</li>
+<li>If attaching a Part would exceed your Mech's Hardpoints, scrap one of your Parts. Spec Parts don't count toward the Hardpoints limit.</li>
+</ul>
+</div>
+
+<h3 id="action">Actions</h3>
+<div class="an">
+<div class="mock"><span class="cl" style="--c:#f97316"></span><span class="ec">EC</span><span class="cec" style="background:#dc2626">●EC</span><span class="nm" style="top:42px">Name</span><span class="ty">Type</span><span class="fx">Effect</span></div>
+<ul class="legend">
+<li>Fields: <b>Color</b>, <b>Name</b>, <b>Total Energy Cost</b> (white), <b>Colored EC</b> below it, <b>Type</b>, <b>Effect</b>.</li>
+<li>Example: <i>Perfect Sabotage</i> costs 5 total, of which 2 must be Purple.</li>
+<li>Have an effect that activates on use.</li>
+</ul>
+</div>
+
+<h3 id="drone">Drones</h3>
+<div class="an">
+<div class="mock"><span class="cl" style="--c:#14b8a6"></span><span class="hp">HP</span><span class="nm">Name</span><span class="ty">Type</span><span class="fx">Effect</span></div>
+<ul class="legend">
+<li>Fields: <b>Name</b>, <b>HP</b>, <b>Type</b>, <b>Effect</b>.</li>
+<li>Deployed during the game in the same space as your Mech or Mothership.</li>
+<li>Have a passive, or an effect that requires tapping to activate.</li>
+<li>Move in the battlefield by tapping and moving 1 space forward or backward. Deploy them in <a href="play.html">Play</a> with the <kbd>+ Token</kbd> button.</li>
+</ul>
+</div>
+</section>
+
+<section id="start"><h2>Starting a Match</h2>
+<ol>
+<li>Players present their Motherships, Commanders and Mechs to each other, and position them on their starting spaces in the Field.</li>
+<li>Players select their Spec Parts from their Spec Parts Deck, reveal them simultaneously, and attach them to their Mechs in the Field.</li>
+<li>Roll a die to decide who plays first. The winner chooses. The second player puts a <b>Generic Energy Token</b> in their Energy Area.</li>
+<li>Players shuffle their Deck and Energy Deck, then draw a 5-card starting hand. Starting from the first player, each player keeps their hand or returns up to 2 cards to the bottom of the Deck and draws that many back (<b>Mulligan</b>). If a player returned any cards, shuffle the Deck after.</li>
+</ol>
+<p class="sub">This is exactly the sequence <a href="play.html">Play</a> walks you through: roll → first/second → Spec Parts → draw 5 → mulligan.</p>
+</section>
+
+<section id="turn"><h2>Turn Structure</h2>
+<table><tr><th>Phase</th><th>What happens</th></tr>
+<tr><td>Untap</td><td>Untap all your cards in the Field, unless an effect prevents it.</td></tr>
+<tr><td>Start</td><td>Deploy destroyed allied Mechs, then activate any Start of Turn abilities.</td></tr>
+<tr><td>Draw</td><td>Draw a card from your Deck.</td></tr>
+<tr><td>Generate Energy</td><td>Put the top card of your Energy Deck face up into the Energy Area.</td></tr>
+<tr><td>Main</td><td>Move your Mech, Drones and Mothership; attach Parts; use Actions; activate Abilities; Attack. Your enemy can use or activate Reactions in response.</td></tr>
+<tr><td>End</td><td>Activate any End of Turn abilities. Your enemy can react before their Turn starts. Remove all Stability damage from all Mechs.</td></tr>
+</table>
+<p>In the <b>first</b> turn of each player, they Generate Energy <b>twice</b>.</p>
+</section>
+
+<section id="keywords"><h2>Keywords</h2>
+<p class="kw"><b>Reaction</b> — you may use this card or ability as a reaction to another play; it resolves first.</p>
+<p class="kw"><b>Block</b> — tap to receive an attack made against another Mothership, Mech or Drone. Must be in range and in the same space as, or in front of, the target.</p>
+<p class="kw"><b>Destroyed</b> — activates when the Mech, Part, Drone or Mothership is destroyed.</p>
+<p class="kw"><b>Stun</b> — target doesn't untap in its next Untap Phase.</p>
+<p class="kw"><b>Scan X</b> — look at the top X cards of your Deck, return each to the top or bottom in any order.</p>
+<p class="kw"><b>Dodge</b> — tap to dodge a Ranged attack against you (no damage on a successful Dodge).</p>
+<p class="kw"><b>Deflect X</b> — enemies must pay (X) extra generic Energy to target this card with Actions and Abilities (not Attacks).</p>
+<p class="kw"><b>Energized</b> — a state allowing special Abilities; an object is Energized when it has a Charge counter.</p>
+<p class="kw"><b>Lock On</b> — if the target doesn't have a Lock counter, add one.</p>
+<p class="kw"><b>Push X / Pull X</b> — move target Mech or Drone X spaces away from / toward your Mech or Mothership.</p>
+<p class="kw"><b>Melee / Short / Long</b> — can only target objects in the same space / 1 space away / 2 spaces away.</p>
+<p class="kw"><b>Piercing</b> — also hits another target in the same space or 1 space behind the original target.</p>
+<p class="kw"><b>Area</b> — hits all enemy objects in the same space as the target.</p>
+<p class="kw"><b>Thermal / Kinetic / Electric</b> — damage types that reduce a Mech's HP.</p>
+<p class="kw"><b>Stability</b> — damage that reduces a Mech's Stability value.</p>
+</section>
+
+</main>
+</div>
+<script>
+const S=[...document.querySelectorAll('main>section')].map(s=>({id:s.id,t:s.querySelector('h2').textContent}));
+document.getElementById('nav').innerHTML=S.map(s=>`<a href="#${s.id}">${s.t}</a>`).join('');
+</script>
+</body></html>
