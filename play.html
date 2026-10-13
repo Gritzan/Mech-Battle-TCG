@@ -14,7 +14,10 @@ button{font:inherit;padding:4px 9px;border:1px solid var(--bd);background:var(--
 button:hover{border-color:var(--ac)} button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 textarea,input{font:inherit;background:var(--pn);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:6px;width:100%}
 input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
-.scr{display:none;height:100%;overflow:auto} .scr.on{display:block} #game.on{display:flex;flex-direction:column;overflow:auto}
+.scr{display:none;height:100%;overflow:auto} .scr.on{display:block} #game.on{display:flex;flex-direction:column;overflow:auto;position:relative}
+#arrows{position:absolute;top:0;left:0;pointer-events:none;z-index:500}
+#tgtbar{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:10002;background:var(--ac);color:#fff;padding:7px 14px;border-radius:10px;display:none;gap:10px;align-items:center;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#tgtbar button{background:#fff;color:var(--ac);border:none;font-weight:700;border-radius:6px;padding:3px 9px}
 .box{max-width:860px;margin:0 auto;padding:16px}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 .two textarea{height:110px;margin:6px 0;font-size:11px}
@@ -98,7 +101,9 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
  </div>
  <div id="log"></div>
  <div id="hand"></div>
+<svg id="arrows"></svg>
 </section>
+<div id="tgtbar">Choose a target — click any card on the field. <button id="tgtcancel">Cancel</button></div>
 <div id="rv"></div>
 <div id="pv"></div>
 <div id="modal"></div>
@@ -110,7 +115,8 @@ const TY={mech:['Mech','#ef4444'],cmd:['Commander','#a855f7'],mother:['Mothershi
 const BW=52,BH=74,R=100,ZN=['hand','field','discard','exile','main','energy','spec'],MOV={mech:1,mother:1,drone:1};
 const SEC={mech:'mech',commander:'cmd',comandante:'cmd',mothership:'mother','nave-mãe':'mother',energy:'energy',energia:'energy','energy deck':'energy',spec:'spec','spec parts':'spec','spec parts deck':'spec',deck:'deck','main deck':'deck'};
 const NEED={mech:1,cmd:1,mother:1,energy:10,spec:5,deck:40};
-let META={},peer,me,opp,link,pc,decks,name='Player',uid=0,zc=1,lt=0,dg=0,BF={},rl,orl,first;
+const PID=Math.random().toString(36).slice(2,8)+'_';
+let META={},peer,me,opp,link,pc,decks,name='Player',uid=0,zc=1,lt=0,dg=0,BF={},rl,orl,first,arrowFrom=null,actr=0;
 const show=id=>document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==id));
 
 function parse(t){const L={mech:[],cmd:[],mother:[],energy:[],spec:[],deck:[]},err=[];let s='deck';
@@ -124,7 +130,7 @@ function parse(t){const L={mech:[],cmd:[],mother:[],energy:[],spec:[],deck:[]},e
  for(const k in c)if(c[k]>3)err.push(`"${k}" has ${c[k]} copies in the Deck (max. 3)`);
  return{L,err}}
 
-const mk=(n,t,s)=>({id:'c'+(++uid),name:n,type:t,src:s,a:0,x:0,y:0,fd:0,tap:0,z:0,dm:0,sd:0,en:0,lk:0});
+const mk=(n,t,s)=>({id:PID+'c'+(++uid),name:n,type:t,src:s,a:0,x:0,y:0,fd:0,tap:0,z:0,dm:0,sd:0,en:0,lk:0,st:0});
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}};
 const CT={dm:['Damage','#ef4444',''],sd:['Stability Damage','#16a34a',''],en:['Energized','#ca8a04','⚡'],lk:['Lock On','#2563eb','◎'],st:['Stun','#0891b2','💫']},TOGGLE=new Set(['en','lk','st']),
  CK={mech:['dm','sd','lk','st'],mother:['dm','lk','st'],drone:['dm','lk','st'],cmd:['st'],spec:['en','st'],part:['en','st'],action:['st'],deck:['en','st']};
@@ -134,7 +140,7 @@ function put(c,fd){c.fd=fd?1:0;c.tap=0;c.z=++zc;
  else{c.a=0;c.y=ROW[c.type]??0;c.x=Math.min(1,me.field.filter(f=>f.a==0&&f.y==c.y).length*.07)}
  me.field.push(c)}
 function newGame(){const D=decks;
- me={vp:0,hand:[],field:[],discard:[],exile:[],main:D.deck.map(n=>mk(n,mty(n),'main')),energy:D.energy.map(n=>mk(n,'energy','energy')),spec:D.spec.map(n=>mk(n,'spec','spec'))};
+ me={vp:0,hand:[],field:[],discard:[],exile:[],arrows:[],main:D.deck.map(n=>mk(n,mty(n),'main')),energy:D.energy.map(n=>mk(n,'energy','energy')),spec:D.spec.map(n=>mk(n,'spec','spec'))};
  shuf(me.main);shuf(me.energy);
  ['mech','mother','cmd'].forEach(k=>D[k][0]&&put(mk(D[k][0],k,'core'),0));
  rl=orl=first=null;$('#fp').textContent='';upd();rollUI()}
@@ -160,7 +166,7 @@ function mull(){const S={},ui=()=>{const ids=Object.keys(S),n=ids.length;
  [[n?`Return ${n} and draw ${n}`:'Keep hand',()=>{ids.forEach(id=>me.main.push(me.hand.splice(me.hand.findIndex(c=>c.id==id),1)[0]));
   for(let i=0;i<n&&me.main.length;i++)me.hand.push(me.main.shift());if(n)log(`mulliganed ${n} card(s)`);upd();$('#modal').style.display='none'}]],1,'Return up to 2 cards to the bottom of your deck; you draw the same number.')};ui()}
 
-const pub=()=>({n:name,vp:me.vp,h:me.hand.length,m:me.main.length,e:me.energy.length,s:me.spec.length,d:me.discard.map(c=>({name:c.name,type:c.type})),x:me.exile.map(c=>({name:c.name,type:c.type})),f:me.field.map(c=>({type:c.type,a:c.a,x:c.x,y:c.y,tap:c.tap,fd:c.fd,z:c.z,dm:c.dm,sd:c.sd,en:c.en,lk:c.lk,name:c.fd?'?':c.name}))});
+const pub=()=>({n:name,vp:me.vp,h:me.hand.length,m:me.main.length,e:me.energy.length,s:me.spec.length,d:me.discard.map(c=>({name:c.name,type:c.type})),x:me.exile.map(c=>({name:c.name,type:c.type})),ar:me.arrows,f:me.field.map(c=>({id:c.id,type:c.type,a:c.a,x:c.x,y:c.y,tap:c.tap,fd:c.fd,z:c.z,dm:c.dm,sd:c.sd,en:c.en,lk:c.lk,st:c.st,name:c.fd?'?':c.name}))});
 const send=o=>{if(link&&link.readyState=='open')link.send(JSON.stringify(o))};
 const sync=()=>send({t:'s',s:pub()});
 function addlog(m){const l=$('#log');l.insertAdjacentHTML('beforeend',`<div>${esc(m)}</div>`);l.scrollTop=l.scrollHeight}
@@ -178,11 +184,13 @@ fetch('cards.json').then(r=>r.json()).then(j=>{CAT=j.cards||[];CAT.forEach(e=>{C
 const pv=(c,own)=>{const e=$('#pv');if(c.fd&&!own){e.style.display='none';return}
  e.innerHTML=`<img src="${imgFor(c.name,c.type)}" alt="${esc(c.name)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`;e.style.display='block'};
 function cel(c,own){const y=TY[c.type]||TY.deck,d=document.createElement('div');
+ d.dataset.id=c.id||'';
  d.className='c'+(c.fd?' fd':'')+(own?' mine':' opp')+(c.tap?' tap':'');d.style.setProperty('--tc',y[1]);d.title=c.fd&&!own?'':c.name;
  const bd=Object.keys(CT).filter(k=>+c[k]>0).map(k=>`<em style="background:${CT[k][1]}" title="${CT[k][0]}">${CT[k][2]}${TOGGLE.has(k)?'':+c[k]|0}</em>`).join('');
  d.innerHTML=`<b>${esc(c.name)}</b><i>${y[0]}</i>${bd?`<div class="bd">${bd}</div>`:''}`;if(bd)d.classList.add('hc');
  if(!c.fd){const im=new Image();im.className='ci';im.alt='';im.src=imgFor(c.name,c.type);im.onload=()=>d.classList.add('im');im.onerror=()=>im.remove();d.prepend(im)}
  if(!c.fd||own){d.onmouseenter=()=>pv(c,own);d.onmouseleave=()=>{$('#pv').style.display='none'}}
+ if(!own)d.onclick=()=>{if(arrowFrom)completeArrow(c.id)};
  return d}
 function drawBF(){const bf=$('#bf');bf.querySelectorAll('.c').forEach(e=>e.remove());
  const bh=bf.clientHeight/5,ch=Math.max(30,Math.min(90,Math.floor(bh-6))),cw=Math.round(ch*.71),fw=bf.clientWidth-cw;BF={bh,cw,ch};
@@ -198,8 +206,11 @@ function renderOpp(){const b=$('#opbar'),o=opp;
  b.innerHTML=o?`<b>${esc(o.n)}</b><span>VP <b>${+o.vp}${o.vp>=5?' 🏆':''}</b></span><span>Hand ${+o.h}</span><span>Deck ${+o.m}</span><span>Energy ${+o.e}</span><span>Spec ${+o.s}</span><button data-a="od">Scrapyard</button><button data-a="ox">Removed (${lst(o.x).length})</button>`:'<span>Waiting for opponent…</span>';
  $('#osy').innerHTML=sy(lst(o&&o.d));drawBase($('#opf'),lst(o&&o.f),0);if(!dg)drawBF()}
 function render(){if(!me)return;
+ const aliveIds=new Set([...me.field.map(c=>c.id),...((opp&&opp.f)||[]).map(c=>c.id)]);
+ me.arrows=me.arrows.filter(a=>aliveIds.has(a.from)&&aliveIds.has(a.to));
  $('#nm').textContent=me.main.length;$('#ne').textContent=me.energy.length;$('#ns').textContent=me.spec.length;$('#nd').textContent=me.discard.length;$('#nx').textContent=me.exile.length;$('#vp').textContent=me.vp+(me.vp>=5?' 🏆':'');
  $('#msy').innerHTML=sy(me.discard);drawBase($('#myf'),me.field,1);
+ requestAnimationFrame(redrawArrows);
  const h=$('#hand');h.innerHTML='';
  me.hand.forEach(c=>{const d=cel(c,1);d.onclick=()=>menu(d,[['Play to field',()=>mv(c.id,'field')],['Play face-down',()=>mv(c.id,'field',1)],['Scrapyard',()=>mv(c.id,'discard')],['Remove from game',()=>mv(c.id,'exile')],...(c.src!='core'?[['Top of deck',()=>mv(c.id,c.src)],['Bottom of deck',()=>mv(c.id,c.src,'bottom')]]:[])]);h.append(d)});
  renderOpp()}
@@ -210,7 +221,29 @@ function menu(el,acts){closeMenu();const m=document.createElement('div');m.id='m
  acts.forEach(([l,f])=>{const b=document.createElement('button');b.textContent=l;b.onclick=f;m.append(b)});document.body.append(m);
  const r=el.getBoundingClientRect(),h=m.offsetHeight,w=m.offsetWidth;
  m.style.left=Math.max(4,Math.min(r.left,innerWidth-w-4))+'px';m.style.top=(r.top-h-4>4?r.top-h-4:Math.min(r.bottom+4,innerHeight-h-4))+'px'}
-const fieldActs=c=>c.src=='token'?[['Remove token',()=>mv(c.id,'discard')]]:[['Flip',()=>{c.fd^=1;upd()}],['To hand',()=>mv(c.id,'hand')],['Scrapyard',()=>mv(c.id,'discard')],['Remove from game',()=>mv(c.id,'exile')],...(c.src!='core'?[['Top of deck',()=>mv(c.id,c.src)],['Bottom of deck',()=>mv(c.id,c.src,'bottom')]]:[])];
+const fieldActs=c=>c.src=='token'?[['Target →',()=>startTarget(c.id)],['Remove token',()=>mv(c.id,'discard')]]:[['Target →',()=>startTarget(c.id)],['Flip',()=>{c.fd^=1;upd()}],['To hand',()=>mv(c.id,'hand')],['Scrapyard',()=>mv(c.id,'discard')],['Remove from game',()=>mv(c.id,'exile')],...(c.src!='core'?[['Top of deck',()=>mv(c.id,c.src)],['Bottom of deck',()=>mv(c.id,c.src,'bottom')]]:[])];
+function startTarget(id){closeMenu();arrowFrom=id;const b=$('#tgtbar');if(b){b.style.display='flex'}}
+function cancelTarget(){arrowFrom=null;const b=$('#tgtbar');if(b)b.style.display='none'}
+function completeArrow(id){if(!arrowFrom)return;if(id==arrowFrom){cancelTarget();return}me.arrows.push({id:PID+'a'+(++actr),from:arrowFrom,to:id});arrowFrom=null;const b=$('#tgtbar');if(b)b.style.display='none';upd()}
+function redrawArrows(){const svg=$('#arrows'),game=$('#game');if(!svg||!game)return;
+ const gw=game.scrollWidth,gh=game.scrollHeight;svg.setAttribute('width',gw);svg.setAttribute('height',gh);
+ const gr=game.getBoundingClientRect();
+ const pos=id=>{const el=game.querySelector(`[data-id="${(id||'').replace(/"/g,'')}"]`);if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left-gr.left+game.scrollLeft+r.width/2,y:r.top-gr.top+game.scrollTop+r.height/2}};
+ const all=[...me.arrows.map(a=>({...a,mine:1})),...((opp&&opp.ar)||[]).map(a=>({...a,mine:0}))];
+ svg.innerHTML='<defs><marker id="ah-mine" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2563eb"/></marker><marker id="ah-opp" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/></marker></defs>';
+ all.forEach(a=>{const p1=pos(a.from),p2=pos(a.to);if(!p1||!p2)return;
+  const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len,col=a.mine?'#2563eb':'#dc2626';
+  const x1=p1.x+ux*14,y1=p1.y+uy*14,x2=p2.x-ux*24,y2=p2.y-uy*24;
+  const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ln.setAttribute('x1',x1);ln.setAttribute('y1',y1);ln.setAttribute('x2',x2);ln.setAttribute('y2',y2);
+  ln.setAttribute('stroke',col);ln.setAttribute('stroke-width','3');ln.setAttribute('stroke-linecap','round');ln.setAttribute('marker-end',`url(#ah-${a.mine?'mine':'opp'})`);
+  svg.append(ln);
+  if(a.mine){const mx=(x1+x2)/2,my=(y1+y2)/2,g=document.createElementNS('http://www.w3.org/2000/svg','g');
+   g.setAttribute('style','cursor:pointer;pointer-events:auto');
+   g.innerHTML=`<circle cx="${mx}" cy="${my}" r="9" fill="${col}"/><text x="${mx}" y="${my+4}" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">×</text>`;
+   g.onclick=()=>{me.arrows=me.arrows.filter(x=>x.id!=a.id);upd()};
+   svg.append(g)}
+ });}
 function drag(d,c,el){
  const m=document.createElement('u');m.className='mn';m.textContent='⋯';m.onpointerdown=e=>e.stopPropagation();m.onclick=e=>{e.stopPropagation();menu(d,fieldActs(c))};d.append(m);
  if(CK[c.type]){const q=document.createElement('u');q.className='ct';q.textContent='±';q.onpointerdown=e=>e.stopPropagation();q.onclick=e=>{e.stopPropagation();cp(d,c)};d.append(q)}
@@ -221,8 +254,8 @@ function drag(d,c,el){
   if(inbf){const r=el.getBoundingClientRect(),fw=el.clientWidth-BF.cw,row=Math.max(0,Math.min(4,Math.floor((ev.clientY-r.top)/BF.bh)));
    c.x=cl((ev.clientX-r.left-BF.cw/2)/fw);c.a=5-row;d.style.left=c.x*fw+'px';d.style.top=row*BF.bh+(BF.bh-BF.ch)/2+'px'}
   else{const fw=el.clientWidth-BW-R,fh=el.clientHeight-BH;c.x=cl(ox+dx/fw);c.y=cl(oy+dy/(fh||1));d.style.left=c.x*fw+'px';d.style.top=c.y*fh+'px'}
-  c.z=++zc;d.style.zIndex=9999;if(Date.now()-lt>60){lt=Date.now();sync()}};
- d.onpointerup=d.onpointercancel=()=>{d.onpointermove=d.onpointerup=d.onpointercancel=null;dg=0;if(moved){sync();renderOpp()}else{c.tap^=1;upd()}}}}
+  c.z=++zc;d.style.zIndex=9999;redrawArrows();if(Date.now()-lt>60){lt=Date.now();sync()}};
+ d.onpointerup=d.onpointercancel=()=>{d.onpointermove=d.onpointerup=d.onpointercancel=null;dg=0;if(moved){sync();renderOpp()}else if(arrowFrom){completeArrow(c.id)}else{c.tap^=1;upd()}}}}
 function closeCp(){const p=$('#cp');p&&p.remove()}
 function cp(el,c){closeMenu();closeCp();const p=document.createElement('div');p.id='cp';p.innerHTML=`<b>${esc(c.name)}</b>`;
  CK[c.type].forEach(k=>{const r=document.createElement('div');r.className='r';r.innerHTML=`<span style="color:${CT[k][1]}">● ${CT[k][0]}</span>`;
@@ -270,8 +303,11 @@ const H={
  od(){modal('Opponent Scrapyard',lst(opp&&opp.d).map(oc))},ox(){modal('Removed from game (opponent)',lst(opp&&opp.x).map(oc))},
  restart(e){const b=e.target;if(b.dataset.s){delete b.dataset.s;b.textContent='Restart';send({t:'x'});return newGame()}b.dataset.s=1;b.textContent='Confirm?';setTimeout(()=>{delete b.dataset.s;b.textContent='Restart'},3000)}};
 document.querySelectorAll('.bar').forEach(b=>b.onclick=e=>{const a=e.target.dataset.a;if(a&&H[a])H[a](e)});
+$('#tgtcancel').onclick=cancelTarget;
 $('#msy').onclick=()=>me&&pile('discard');$('#osy').onclick=H.od;
 onresize=()=>render();
+$('#game').addEventListener('scroll',redrawArrows);
+document.addEventListener('keydown',e=>{if(e.key=='Escape')cancelTarget()});
 
 let saved={};try{saved=JSON.parse(localStorage.getItem('mb')||'{}')}catch{}
 $('#pn').value=saved.n||'';$('#dl').value=saved.d||'';
