@@ -126,7 +126,8 @@ function parse(t){const L={mech:[],cmd:[],mother:[],energy:[],spec:[],deck:[]},e
 
 const mk=(n,t,s)=>({id:'c'+(++uid),name:n,type:t,src:s,a:0,x:0,y:0,fd:0,tap:0,z:0,dm:0,sd:0,en:0,lk:0});
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}};
-const CT={dm:['Damage','#ef4444',''],sd:['Stability Damage','#16a34a',''],en:['Energized','#ca8a04','⚡'],lk:['Lock On','#2563eb','◎']},CK={mech:['dm','sd','lk'],mother:['dm','lk'],drone:['dm','lk'],deck:['en'],part:['en'],spec:['en']};
+const CT={dm:['Damage','#ef4444',''],sd:['Stability Damage','#16a34a',''],en:['Energized','#ca8a04','⚡'],lk:['Lock On','#2563eb','◎'],st:['Stun','#0891b2','💫']},TOGGLE=new Set(['en','lk','st']),
+ CK={mech:['dm','sd','lk','st'],mother:['dm','lk','st'],drone:['dm','lk','st'],cmd:['st'],spec:['en','st'],part:['en','st'],action:['st'],deck:['en','st']};
 const cl=v=>Math.max(0,Math.min(1,v)),ROW={cmd:0,spec:0,deck:0,energy:1,gen:1};
 function put(c,fd){c.fd=fd?1:0;c.tap=0;c.z=++zc;
  if(MOV[c.type]){c.a=1;c.y=0;c.x=Math.min(1,.05+me.field.filter(f=>f.a==1).length*.1)}
@@ -178,7 +179,7 @@ const pv=(c,own)=>{const e=$('#pv');if(c.fd&&!own){e.style.display='none';return
  e.innerHTML=`<img src="${imgFor(c.name,c.type)}" alt="${esc(c.name)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`;e.style.display='block'};
 function cel(c,own){const y=TY[c.type]||TY.deck,d=document.createElement('div');
  d.className='c'+(c.fd?' fd':'')+(own?' mine':' opp')+(c.tap?' tap':'');d.style.setProperty('--tc',y[1]);d.title=c.fd&&!own?'':c.name;
- const bd=Object.keys(CT).filter(k=>+c[k]>0).map(k=>`<em style="background:${CT[k][1]}" title="${CT[k][0]}">${CT[k][2]}${+c[k]|0}</em>`).join('');
+ const bd=Object.keys(CT).filter(k=>+c[k]>0).map(k=>`<em style="background:${CT[k][1]}" title="${CT[k][0]}">${CT[k][2]}${TOGGLE.has(k)?'':+c[k]|0}</em>`).join('');
  d.innerHTML=`<b>${esc(c.name)}</b><i>${y[0]}</i>${bd?`<div class="bd">${bd}</div>`:''}`;if(bd)d.classList.add('hc');
  if(!c.fd){const im=new Image();im.className='ci';im.alt='';im.src=imgFor(c.name,c.type);im.onload=()=>d.classList.add('im');im.onerror=()=>im.remove();d.prepend(im)}
  if(!c.fd||own){d.onmouseenter=()=>pv(c,own);d.onmouseleave=()=>{$('#pv').style.display='none'}}
@@ -225,9 +226,12 @@ function drag(d,c,el){
 function closeCp(){const p=$('#cp');p&&p.remove()}
 function cp(el,c){closeMenu();closeCp();const p=document.createElement('div');p.id='cp';p.innerHTML=`<b>${esc(c.name)}</b>`;
  CK[c.type].forEach(k=>{const r=document.createElement('div');r.className='r';r.innerHTML=`<span style="color:${CT[k][1]}">● ${CT[k][0]}</span>`;
-  const v=document.createElement('b');v.textContent=c[k]|0;
-  const mb=(l,dl)=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>{c[k]=Math.max(0,(c[k]|0)+dl);v.textContent=c[k];upd()};return b};
-  r.append(mb('−',-1),v,mb('+',1));p.append(r)});
+  if(TOGGLE.has(k)){const tb=document.createElement('button');const rf=()=>tb.textContent=c[k]?'Remove':'Add';rf();
+   tb.onclick=()=>{c[k]=c[k]?0:1;rf();upd()};r.append(tb)}
+  else{const v=document.createElement('b');v.textContent=c[k]|0;
+   const mb=(l,dl)=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>{c[k]=Math.max(0,(c[k]|0)+dl);v.textContent=c[k];upd()};return b};
+   r.append(mb('−',-1),v,mb('+',1))}
+  p.append(r)});
  const ok=document.createElement('button');ok.className='p';ok.textContent='OK';ok.style.marginTop='6px';ok.onclick=closeCp;p.append(ok);document.body.append(p);
  const r=el.getBoundingClientRect(),h=p.offsetHeight,w=p.offsetWidth;
  p.style.left=Math.max(4,Math.min(r.left,innerWidth-w-4))+'px';p.style.top=(r.top-h-4>4?r.top-h-4:Math.min(r.bottom+4,innerHeight-h-4))+'px'}
