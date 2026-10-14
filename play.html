@@ -14,7 +14,9 @@ button{font:inherit;padding:4px 9px;border:1px solid var(--bd);background:var(--
 button:hover{border-color:var(--ac)} button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 textarea,input{font:inherit;background:var(--pn);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:6px;width:100%}
 input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
-.scr{display:none;height:100%;overflow:auto} .scr.on{display:block} #game.on{display:flex;flex-direction:column;overflow:auto;position:relative}
+.scr{display:none;height:100%;overflow:auto} .scr.on{display:block} #game.on{display:flex;flex-direction:row;overflow:auto;position:relative;justify-content:center;gap:18px;padding:14px}
+#mainCol{display:flex;flex-direction:column;width:1080px;max-width:100%;min-width:0;flex:none}
+#sideCol{display:flex;flex-direction:column;gap:12px;width:300px;flex:none;overflow:auto}
 #arrows{position:absolute;top:0;left:0;pointer-events:none;z-index:500}
 #tgtbar{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:10002;background:var(--ac);color:#fff;padding:7px 14px;border-radius:10px;display:none;gap:10px;align-items:center;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #tgtbar button{background:#fff;color:var(--ac);border:none;font-weight:700;border-radius:6px;padding:3px 9px}
@@ -22,6 +24,10 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 .two textarea{height:110px;margin:6px 0;font-size:11px}
 .bar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:5px 8px;background:var(--pn);border-bottom:1px solid var(--bd);font-size:13px}
+.bar.side{flex-direction:column;align-items:stretch;gap:7px;padding:10px;border:1px solid var(--bd);border-radius:10px;font-size:12.5px}
+.bar.side>b:first-child{font-size:15px;padding:0 1px}
+.bar.side span{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;background:var(--fl);border-radius:6px;padding:5px 7px}
+.bar.side>button{width:100%}
 .fld{flex:1;min-height:110px;position:relative;background:var(--fl);overflow:hidden;border-bottom:1px solid var(--bd)}
 #log{height:40px;overflow:auto;font-size:12px;color:var(--mu);padding:2px 8px;background:var(--pn)}
 #hand{display:flex;gap:6px;overflow-x:auto;padding:6px 8px;min-height:112px;background:var(--pn)}
@@ -58,16 +64,13 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 #rv .c{position:relative;font-size:13px;cursor:pointer}
 .ci{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px}
 .c.im b,.c.im i{visibility:hidden}
-#pv{position:fixed;right:8px;top:calc(60px + env(safe-area-inset-top,0px));width:240px;z-index:10001;display:none;pointer-events:none;background:var(--pn);border:2px solid var(--ac);border-radius:10px;padding:6px;font-weight:700}
+#pv{position:fixed;left:0;top:calc(60px + env(safe-area-inset-top,0px));width:240px;z-index:900;display:none;pointer-events:none;background:var(--pn);border:2px solid var(--ac);border-radius:10px;padding:6px;font-weight:700;max-width:calc(100vw - 20px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
 #pv img{width:100%;display:block;border-radius:6px}
 .mb{width:min(560px,94%)}
 .mb .c{position:relative;flex:none;--w:72px;--h:100px;cursor:default}
 
 /* In-game chat */
-#chatToggle{position:fixed;right:16px;bottom:18px;z-index:10010;width:48px;height:48px;border:0;border-radius:50%;background:var(--ac);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.28);display:none;align-items:center;justify-content:center;padding:0}
-#chatToggle svg{width:25px;height:25px}
-#chatUnread{position:absolute;right:0;top:0;width:11px;height:11px;border-radius:50%;background:#ef4444;border:2px solid var(--pn);display:none}
-#chatPanel{position:fixed;right:16px;bottom:76px;z-index:10010;width:min(320px,calc(100vw - 24px));height:min(390px,calc(100dvh - 110px));background:var(--pn);border:1px solid var(--bd);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);display:none;flex-direction:column;overflow:hidden}
+#chatPanel{position:fixed;right:16px;bottom:18px;z-index:10010;width:min(300px,calc(100vw - 24px));height:min(300px,calc(100dvh - 40px));background:var(--pn);border:1px solid var(--bd);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);display:flex;flex-direction:column;overflow:hidden}
 #chatHead{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid var(--bd);font-weight:700}
 #chatHead button{font-size:20px;line-height:1;padding:2px 7px}
 #chatMessages{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:7px}
@@ -101,33 +104,38 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 </div></section>
 
 <section id="game" class="scr">
- <div id="opbar" class="bar"></div>
- <div id="opf" class="base"><div class="sy" id="osy" style="left:6px"></div></div>
- <div id="bf"><div class="band">Area 5</div><div class="band">Area 4</div><div class="band">Area 3</div><div class="band">Area 2</div><div class="band">Area 1</div></div>
- <div id="myf" class="base"><div class="sy" id="msy" style="right:6px"></div></div>
- <div id="mybar" class="bar">
-  <span>Deck <b id="nm"></b> <button data-a="draw">Draw</button> <input id="dn" type="number" value="1" min="1" max="40" title="Cards to draw"> <button data-a="shuf">Shuffle</button> · Look at top <input id="kn" type="number" value="3" min="1" max="40"> <button data-a="vm">Look</button></span>
-  <span>Energy <b id="ne"></b> <button data-a="en">Put in field</button> <button data-a="she">Shuffle</button> · Look at top <input id="ke" type="number" value="2" min="1" max="10"> <button data-a="ve">Look</button></span>
-  <span>Spec <b id="ns"></b> <button data-a="vs">Choose</button></span>
-  <span>Scrapyard <b id="nd"></b> <button data-a="vd">View</button> · Removed <b id="nx"></b> <button data-a="vx">View</button></span>
-  <button data-a="drone">+ Token</button>
-  <span>VP <button data-a="vp0">−</button> <b id="vp"></b> <button data-a="vp1">+</button> / 5</span>
-  <span id="fp"></span> <button data-a="coin">Coin flip</button> <button data-a="restart">Restart</button>
+ <div id="mainCol">
+  <div id="opf" class="base"><div class="sy" id="osy" style="left:6px"></div></div>
+  <div id="bf"><div class="band">Area 5</div><div class="band">Area 4</div><div class="band">Area 3</div><div class="band">Area 2</div><div class="band">Area 1</div></div>
+  <div id="myf" class="base"><div class="sy" id="msy" style="right:6px"></div></div>
+  <div id="log"></div>
+  <div id="hand"></div>
  </div>
- <div id="log"></div>
- <div id="hand"></div>
+ <aside id="sideCol">
+  <div id="opbar" class="bar side"></div>
+  <div id="mybar" class="bar side">
+   <span>Deck <b id="nm"></b> <button data-a="draw">Draw</button> <input id="dn" type="number" value="1" min="1" max="40" title="Cards to draw"> <button data-a="shuf">Shuffle</button></span>
+   <span>Look at top <input id="kn" type="number" value="3" min="1" max="40"> <button data-a="vm">Look</button></span>
+   <span>Energy <b id="ne"></b> <button data-a="en">Put in field</button> <button data-a="she">Shuffle</button></span>
+   <span>Look at top <input id="ke" type="number" value="2" min="1" max="10"> <button data-a="ve">Look</button></span>
+   <span>Spec <b id="ns"></b> <button data-a="vs">Choose</button></span>
+   <span>Scrapyard <b id="nd"></b> <button data-a="vd">View</button></span>
+   <span>Removed <b id="nx"></b> <button data-a="vx">View</button></span>
+   <button data-a="drone">+ Token</button>
+   <span>VP <button data-a="vp0">−</button> <b id="vp"></b> <button data-a="vp1">+</button> / 5</span>
+   <span id="fp"></span>
+   <button data-a="coin">Coin flip</button>
+   <button data-a="restart">Restart</button>
+  </div>
+ </aside>
 <svg id="arrows"></svg>
 </section>
 <div id="tgtbar">Choose a target — click any card on the field. <button id="tgtcancel">Cancel</button></div>
 <div id="rv"></div>
 <div id="pv"></div>
 <div id="modal"></div>
-<button id="chatToggle" aria-label="Open chat" title="Chat">
- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg>
- <span id="chatUnread"></span>
-</button>
 <section id="chatPanel" aria-label="Game chat">
- <div id="chatHead"><span>Chat</span><button id="chatClose" aria-label="Close chat" title="Close">×</button></div>
+ <div id="chatHead"><span>Chat</span></div>
  <div id="chatMessages" aria-live="polite"></div>
  <form id="chatForm"><input id="chatInput" maxlength="500" autocomplete="off" placeholder="Type a message…" aria-label="Message"><button class="p" type="submit">Send</button></form>
 </section>
@@ -143,24 +151,11 @@ const PID=Math.random().toString(36).slice(2,8)+'_';
 let META={},peer,me,opp,link,pc,decks,name='Player',uid=0,zc=1,lt=0,dg=0,BF={},rl,orl,first,arrowFrom=null,actr=0;
 const show=id=>document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==id));
 
-const chatHistory=[];
-let chatOpen=false,chatUnread=0;
-function renderChatMessage(text,mine){
+function receiveChat(text,mine){
  const box=$('#chatMessages'),d=document.createElement('div');
  d.className='chatBubble '+(mine?'chatMine':'chatOpp');d.textContent=text;
  box.append(d);box.scrollTop=box.scrollHeight;
 }
-function setChatOpen(open){
- chatOpen=open;$('#chatPanel').style.display=open?'flex':'none';
- $('#chatToggle').style.display=$('#game').classList.contains('on')&&!open?'flex':'none';
- if(open){chatUnread=0;$('#chatUnread').style.display='none';$('#chatInput').focus()}
-}
-function receiveChat(text,mine){
- renderChatMessage(text,mine);
- if(!mine&&!chatOpen){chatUnread++;$('#chatUnread').style.display='block'}
-}
-$('#chatToggle').onclick=()=>setChatOpen(true);
-$('#chatClose').onclick=()=>setChatOpen(false);
 $('#chatForm').onsubmit=e=>{
  e.preventDefault();const input=$('#chatInput'),text=input.value.trim();
  if(!text)return;
@@ -231,7 +226,8 @@ const imgFor=(n,t)=>{const e=ent(n,t);return 'cards/'+encodeURIComponent((e&&e.i
 const mty=n=>{const e=ent(n,'part')||ent(n,'action');return e?nt(e.type):'deck'};
 fetch('cards.json').then(r=>r.json()).then(j=>{CAT=j.cards||[];CAT.forEach(e=>{CI[nt(e.type)+'|'+String(e.name).toLowerCase()]=e})}).catch(()=>{});
 const pv=(c,own)=>{const e=$('#pv');if(c.fd&&!own){e.style.display='none';return}
- e.innerHTML=`<img src="${imgFor(c.name,c.type)}" alt="${esc(c.name)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`;e.style.display='block'};
+ e.innerHTML=`<img src="${imgFor(c.name,c.type)}" alt="${esc(c.name)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`;e.style.display='block';
+ const sc=$('#sideCol');if(sc){const r=sc.getBoundingClientRect(),w=240;e.style.right='auto';e.style.left=Math.round(r.left+(r.width-w)/2)+'px';e.style.top=Math.round(r.top+r.height*0.28)+'px'}};
 function cel(c,own){const y=TY[c.type]||TY.deck,d=document.createElement('div');
  d.dataset.id=c.id||'';
  d.className='c'+(c.fd?' fd':'')+(own?' mine':' opp')+(c.tap?' tap':'');d.style.setProperty('--tc',y[1]);d.title=c.fd&&!own?'':c.name;
@@ -366,7 +362,7 @@ $('#go').onclick=()=>{const{L,err}=parse($('#dl').value);name=$('#pn').value.tri
  if(err.length&&!$('#ig').checked){$('#msg').innerHTML=err.map(esc).join('<br>');return}
  $('#msg').textContent='';decks=L;try{localStorage.setItem('mb',JSON.stringify({n:name,d:$('#dl').value}))}catch{}
  me=null;show('lobby')};
-function start(){show('game');if(!me)newGame();else{render();sync()}if(!chatOpen)$('#chatToggle').style.display='flex'}
+function start(){show('game');if(!me)newGame();else{render();sync()}}
 const rid=()=>Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
 function onMsg(raw){let m;try{m=typeof raw=='string'?JSON.parse(raw):raw}catch{return}if(!m)return;
  if(m.t=='s'){opp=m.s;renderOpp()}else if(m.t=='chat'&&typeof m.m=='string')receiveChat(m.m.slice(0,500),false);else if(m.t=='l')addlog(m.m);else if(m.t=='r'){orl=Math.min(20,Math.max(1,+m.v|0));resolve()}else if(m.t=='f'){first=!m.w;afterPick()}else if(m.t=='x')newGame();else if(m.t=='v'&&m.c&&typeof m.c=='object')showRv(m.c,opp?String(opp.n).slice(0,24):'Opponent')}
