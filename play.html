@@ -16,7 +16,7 @@ textarea,input{font:inherit;background:var(--pn);color:var(--tx);border:1px soli
 input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 .scr{display:none;height:100%;overflow:auto} .scr.on{display:block} #game.on{display:flex;flex-direction:row;overflow:auto;position:relative;justify-content:center;gap:18px;padding:14px}
 #mainCol{display:flex;flex-direction:column;width:1080px;max-width:100%;min-width:0;flex:none}
-#sideCol{display:flex;flex-direction:column;gap:12px;width:300px;flex:none}
+#sideCol{display:flex;flex-direction:column;gap:8px;width:300px;height:1080px;flex:none;overflow:hidden}
 #arrows{position:absolute;top:0;left:0;pointer-events:none;z-index:500}
 #tgtbar{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:10002;background:var(--ac);color:#fff;padding:7px 14px;border-radius:10px;display:none;gap:10px;align-items:center;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #tgtbar button{background:#fff;color:var(--ac);border:none;font-weight:700;border-radius:6px;padding:3px 9px}
@@ -28,12 +28,18 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 .two textarea{height:110px;margin:6px 0;font-size:11px}
 .bar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:5px 8px;background:var(--pn);border-bottom:1px solid var(--bd);font-size:13px}
-.bar.side{flex-direction:column;align-items:stretch;gap:7px;padding:10px;border:1px solid var(--bd);border-radius:10px;font-size:12.5px}
-.bar.side>b:first-child{font-size:15px;padding:0 1px}
-.bar.side span{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;background:var(--fl);border-radius:6px;padding:5px 7px}
-.bar.side>button{width:100%}
+.bar.side{flex-direction:column;align-items:stretch;gap:5px;padding:7px;border:1px solid var(--bd);border-radius:10px;font-size:11.5px}
+.bar.side>b:first-child{font-size:13px;padding:0 1px}
+.bar.side span{display:flex;flex-wrap:wrap;gap:3px 5px;align-items:center;background:var(--fl);border-radius:6px;padding:3px 5px}
+.bar.side>button{width:100%;padding:3px 6px;font-size:11.5px}
+#opbar{display:flex;flex-direction:row;flex-wrap:wrap;align-content:flex-start;gap:4px;padding:6px;font-size:11px}
+#opbar>b{width:100%;font-size:13px}
+#opbar>span{flex:1 1 auto;white-space:nowrap;padding:3px 5px}
+#opbar>button{width:auto;flex:1 1 40%;padding:3px 5px;font-size:10.5px}
+#mybar{flex:1 1 auto;min-height:0;overflow-y:auto}
+#mybar #passBtn{font-size:14px;padding:9px 8px;min-height:38px;letter-spacing:.02em}
 .fld{flex:1;min-height:110px;position:relative;background:var(--fl);overflow:hidden;border-bottom:1px solid var(--bd)}
-#hand{display:flex;gap:6px;overflow-x:auto;padding:6px 8px;min-height:112px;background:var(--pn)}
+#hand{display:flex;justify-content:center;align-items:center;gap:6px;overflow-x:auto;padding:6px 8px;min-height:112px;background:var(--pn)}
 .c{position:absolute;width:var(--w,64px);height:var(--h,90px);border:2px solid var(--tc);border-radius:6px;background:var(--pn);padding:3px;font-size:10px;line-height:1.2;overflow:hidden;touch-action:none;user-select:none;display:flex;flex-direction:column;justify-content:space-between}
 .c i{color:var(--mu);font-style:normal;font-size:9px}
 .c.fd{background:repeating-linear-gradient(45deg,#2b3550 0 6px,#3a4668 6px 12px);color:transparent;border-color:#667}
@@ -73,17 +79,17 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 .mb .c{position:relative;flex:none;--w:72px;--h:100px;cursor:default}
 
 /* In-game chat */
-#chatPanel{flex:1 1 160px;min-height:160px;background:var(--pn);border:1px solid var(--bd);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
-#chatHead{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid var(--bd);font-weight:700}
+#chatPanel{flex:0 0 300px;height:300px;min-height:300px;background:var(--pn);border:1px solid var(--bd);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+#chatHead{display:flex;align-items:center;justify-content:space-between;padding:6px 9px;border-bottom:1px solid var(--bd);font-weight:700;font-size:12px}
 #chatHead button{font-size:20px;line-height:1;padding:2px 7px}
-#chatMessages{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:7px}
-.chatBubble{max-width:88%;padding:7px 10px;border-radius:12px;overflow-wrap:anywhere;white-space:pre-wrap}
+#chatMessages{flex:1;min-height:0;overflow:auto;padding:7px;display:flex;flex-direction:column;gap:5px}
+.chatBubble{max-width:88%;padding:5px 8px;border-radius:12px;overflow-wrap:anywhere;white-space:pre-wrap;font-size:11px}
 .chatMine{align-self:flex-end;background:#dbeafe;color:#1d4ed8;border-bottom-right-radius:4px}
 .chatOpp{align-self:flex-start;background:#fee2e2;color:#b91c1c;border-bottom-left-radius:4px}
 .chatLog{align-self:center;max-width:95%;font-size:11px;color:var(--mu);background:none;padding:1px 4px;text-align:center}
-#chatForm{display:flex;gap:6px;padding:8px;border-top:1px solid var(--bd)}
-#chatInput{min-width:0;flex:1}
-#chatForm button{flex:none}
+#chatForm{display:flex;gap:5px;padding:6px;border-top:1px solid var(--bd)}
+#chatInput{min-width:0;flex:1;padding:5px;font-size:11px}
+#chatForm button{flex:none;padding:4px 7px;font-size:11px}
 </style></head><body>
 
 <section id="deckscr" class="scr on"><div class="box">
@@ -262,7 +268,7 @@ function drawBase(el,list,own){el.querySelectorAll('.c').forEach(e=>e.remove());
  list.filter(c=>c&&!(c.a>0)).sort((a,b)=>(a.z|0)-(b.z|0)).forEach((c,i)=>{const d=cel(c,own),x=+c.x||0,y=+c.y||0;
   d.style.left=(own?x*fw:R+(1-x)*fw)+'px';d.style.top=(own?y:1-y)*fh+'px';d.style.zIndex=i;el.append(d);if(own)drag(d,c,el)})}
 function renderOpp(){const b=$('#opbar'),o=opp;
- b.innerHTML=o?`<b>${esc(o.n)}</b><span>VP <b>${+o.vp}${o.vp>=5?' 🏆':''}</b></span><span>Hand ${+o.h}</span><span>Deck ${+o.m}</span><span>Energy ${+o.e}</span><span>Spec ${+o.s}</span><button data-a="od">Scrapyard</button><button data-a="ox">Removed (${lst(o.x).length})</button>`:'<span>Waiting for opponent…</span>';
+ b.innerHTML=o?`<b>${esc(o.n)}</b><span>VP <b>${+o.vp}${o.vp>=5?' 🏆':''}</b></span><span>Hand ${+o.h}</span><span>Deck ${+o.m}</span><button data-a="od">Scrapyard</button><button data-a="ox">Removed (${lst(o.x).length})</button>`:'<span>Waiting for opponent…</span>';
  $('#osy').innerHTML=sy(lst(o&&o.d));drawBase($('#opf'),lst(o&&o.f),0);if(!dg)drawBF()}
 function render(){if(!me)return;
  const aliveIds=new Set([...me.field.map(c=>c.id),...((opp&&opp.f)||[]).map(c=>c.id)]);
