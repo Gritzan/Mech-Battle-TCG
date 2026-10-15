@@ -128,7 +128,6 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
    <span>Removed <b id="nx"></b> <button data-a="vx">View</button></span>
    <button data-a="drone">+ Token</button>
    <span>VP <button data-a="vp0">−</button> <b id="vp"></b> <button data-a="vp1">+</button> / 5</span>
-   <button data-a="coin">Coin flip</button>
    <button data-a="restart">Restart</button>
   </div>
   <section id="chatPanel" aria-label="Game chat">
@@ -185,8 +184,9 @@ const CT={dm:['Damage','#ef4444',''],sd:['Stability Damage','#16a34a',''],en:['E
 const cl=v=>Math.max(0,Math.min(1,v)),ROW={cmd:0,spec:0,deck:0,energy:1,gen:1};
 function put(c,fd){c.fd=fd?1:0;c.tap=0;c.z=++zc;
  if(MOV[c.type]){c.a=1;c.y=0;const n=me.field.filter(f=>f.a==1).length,total=n+1,start=.5-(total-1)*.05;c.x=cl(start+n*.1)}
- else{c.a=0;c.y=ROW[c.type]??0;c.x=Math.min(1,me.field.filter(f=>f.a==0&&f.y==c.y).length*.07)}
- me.field.push(c)}
+ else{c.a=0;c.y=ROW[c.type]??0;c.x=.5}
+ me.field.push(c);
+ if(!MOV[c.type]){const row=me.field.filter(f=>f.a==0&&f.y==c.y);row.forEach((f,i)=>f.x=cl(.5+(i-(row.length-1)/2)*.12))}}
 function newGame(){const D=decks;
  me={vp:0,hand:[],field:[],discard:[],exile:[],arrows:[],main:D.deck.map(n=>mk(n,mty(n),'main')),energy:D.energy.map(n=>mk(n,'energy','energy')),spec:D.spec.map(n=>mk(n,'spec','spec'))};
  shuf(me.main);shuf(me.energy);
@@ -335,7 +335,7 @@ function modal(title,rows,btns,lock,info){const m=$('#modal');m.style.display='f
  if(!lock){$('#mx').onclick=()=>m.style.display='none';m.onclick=e=>{if(e.target==m)m.style.display='none'}}else m.onclick=null}
 const SPEC='You can deploy up to 3 Spec Parts, with a TOTAL ENERGY COST equal to or lower than your Mech HP, and of different types.';
 function pile(k,done){const T={discard:'Scrapyard',exile:'Removed from game',spec:'Spec Parts — choose which enter the field',main:'Deck (top first)',energy:'Energy Deck (top first)'},re=()=>pile(k,done),
- O={discard:[['Field','field'],['Hand','hand'],['Remove','exile']],exile:[['Field','field'],['Hand','hand'],['Scrapyard','discard']]}[k]||[['Field','field'],['Hand','hand'],['Scrapyard','discard']];
+ O=k=='spec'&&done?[['Field','field']]:({discard:[['Field','field'],['Hand','hand'],['Remove','exile']],exile:[['Field','field'],['Hand','hand'],['Scrapyard','discard']]}[k]||[['Field','field'],['Hand','hand'],['Scrapyard','discard']]);
  modal(T[k],me[k].map(c=>({t:c.name,c,b:O.map(([l,t])=>[l,()=>{mv(c.id,t);re()}])})),done?[['Done',()=>{$('#modal').style.display='none';done()}]]:0,!!done,k=='spec'?SPEC:0);
  if(k=='main'||k=='energy'){const b=document.createElement('button');b.textContent='Shuffle and close';b.onclick=()=>{shuf(me[k]);log('shuffled the '+(k=='main'?'deck':'Energy Deck'));upd();$('#modal').style.display='none'};$('.mb').append(b)}}
 function showRv(c,who){const r=$('#rv'),w=document.createElement('div');w.className='rvw';
