@@ -90,6 +90,33 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 #chatForm{display:flex;gap:5px;padding:6px;border-top:1px solid var(--bd)}
 #chatInput{min-width:0;flex:1;padding:5px;font-size:11px}
 #chatForm button{flex:none;padding:4px 7px;font-size:11px}
+
+/* Dynamic viewport layout: keep the play area and sidebar within the window. */
+#game.on{height:100vh;height:100dvh;overflow:hidden;align-items:stretch;padding:clamp(4px,1vh,14px) clamp(4px,1vw,14px);gap:clamp(6px,1.2vw,18px)}
+#mainCol{height:100%;min-height:0}
+#sideCol{height:100%;min-height:0;gap:clamp(4px,.7vh,8px)}
+#opf,#myf{height:clamp(88px,17vh,158px);flex:0 0 clamp(88px,17vh,158px);min-height:0}
+#bf{flex:1 1 0;min-height:0}
+#hand{flex:0 0 clamp(68px,12vh,112px);min-height:0;padding:clamp(3px,.6vh,6px) clamp(4px,.7vw,8px);gap:clamp(3px,.55vw,6px)}
+#hand .c{--h:clamp(54px,9.7vh,90px);--w:clamp(40px,4.8vw,64px);font-size:clamp(8px,1vh,10px)}
+#opbar{font-size:clamp(9px,1.05vh,11px);gap:clamp(2px,.4vh,4px);padding:clamp(3px,.55vh,6px)}
+#opbar>b{font-size:clamp(10px,1.2vh,13px)}
+#opbar>span{padding:clamp(1px,.3vh,3px) clamp(2px,.4vh,5px)}
+#opbar>button{padding:clamp(1px,.3vh,3px) clamp(3px,.45vh,5px);font-size:clamp(9px,1vh,10.5px)}
+#mybar{flex:1 1 0;min-height:0;overflow-y:auto;font-size:clamp(9px,1.05vh,11.5px);gap:clamp(2px,.4vh,5px);padding:clamp(3px,.6vh,7px)}
+.bar.side>b:first-child{font-size:clamp(10px,1.2vh,13px)}
+.bar.side span{gap:clamp(2px,.35vh,3px) clamp(3px,.45vh,5px);padding:clamp(1px,.25vh,3px) clamp(3px,.45vh,5px)}
+.bar.side>button{padding:clamp(1px,.25vh,3px) clamp(3px,.45vh,6px);font-size:clamp(9px,1.05vh,11.5px)}
+#mybar #passBtn{font-size:clamp(12px,1.5vh,14px);padding:clamp(5px,.8vh,9px) clamp(5px,.7vw,8px);min-height:clamp(30px,4vh,38px);flex:none}
+#chatPanel{flex:0 0 30%;height:30%;min-height:0}
+#chatHead{padding:clamp(3px,.5vh,6px) clamp(5px,.7vw,9px);font-size:clamp(10px,1.1vh,12px)}
+#chatHead button{font-size:clamp(15px,1.8vh,20px);padding:1px 6px}
+#chatMessages{padding:clamp(3px,.6vh,7px);gap:clamp(2px,.4vh,5px)}
+.chatBubble{padding:clamp(3px,.45vh,5px) clamp(5px,.6vw,8px);font-size:clamp(9px,1.05vh,11px)}
+.chatLog{font-size:clamp(9px,1.05vh,11px)}
+#chatForm{gap:4px;padding:clamp(3px,.5vh,6px)}
+#chatInput{padding:clamp(3px,.45vh,5px);font-size:clamp(9px,1.05vh,11px)}
+#chatForm button{padding:clamp(2px,.35vh,4px) clamp(4px,.6vw,7px);font-size:clamp(9px,1.05vh,11px)}
 </style></head><body>
 
 <section id="deckscr" class="scr on"><div class="box">
