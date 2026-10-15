@@ -16,7 +16,7 @@ textarea,input{font:inherit;background:var(--pn);color:var(--tx);border:1px soli
 input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 .scr{display:none;height:100%;overflow:auto} .scr.on{display:block} #game.on{display:flex;flex-direction:row;overflow:auto;position:relative;justify-content:center;gap:18px;padding:14px}
 #mainCol{display:flex;flex-direction:column;width:1080px;max-width:100%;min-width:0;flex:none}
-#sideCol{display:flex;flex-direction:column;gap:12px;width:300px;flex:none;overflow:auto}
+#sideCol{display:flex;flex-direction:column;gap:12px;width:300px;flex:none}
 #arrows{position:absolute;top:0;left:0;pointer-events:none;z-index:500}
 #tgtbar{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:10002;background:var(--ac);color:#fff;padding:7px 14px;border-radius:10px;display:none;gap:10px;align-items:center;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #tgtbar button{background:#fff;color:var(--ac);border:none;font-weight:700;border-radius:6px;padding:3px 9px}
@@ -29,7 +29,6 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 .bar.side span{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;background:var(--fl);border-radius:6px;padding:5px 7px}
 .bar.side>button{width:100%}
 .fld{flex:1;min-height:110px;position:relative;background:var(--fl);overflow:hidden;border-bottom:1px solid var(--bd)}
-#log{height:40px;overflow:auto;font-size:12px;color:var(--mu);padding:2px 8px;background:var(--pn)}
 #hand{display:flex;gap:6px;overflow-x:auto;padding:6px 8px;min-height:112px;background:var(--pn)}
 .c{position:absolute;width:var(--w,64px);height:var(--h,90px);border:2px solid var(--tc);border-radius:6px;background:var(--pn);padding:3px;font-size:10px;line-height:1.2;overflow:hidden;touch-action:none;user-select:none;display:flex;flex-direction:column;justify-content:space-between}
 .c i{color:var(--mu);font-style:normal;font-size:9px}
@@ -70,13 +69,14 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 .mb .c{position:relative;flex:none;--w:72px;--h:100px;cursor:default}
 
 /* In-game chat */
-#chatPanel{position:fixed;right:16px;bottom:18px;z-index:10010;width:min(300px,calc(100vw - 24px));height:min(300px,calc(100dvh - 40px));background:var(--pn);border:1px solid var(--bd);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);display:flex;flex-direction:column;overflow:hidden}
+#chatPanel{flex:1 1 160px;min-height:160px;background:var(--pn);border:1px solid var(--bd);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
 #chatHead{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid var(--bd);font-weight:700}
 #chatHead button{font-size:20px;line-height:1;padding:2px 7px}
 #chatMessages{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:7px}
 .chatBubble{max-width:88%;padding:7px 10px;border-radius:12px;overflow-wrap:anywhere;white-space:pre-wrap}
 .chatMine{align-self:flex-end;background:#dbeafe;color:#1d4ed8;border-bottom-right-radius:4px}
 .chatOpp{align-self:flex-start;background:#fee2e2;color:#b91c1c;border-bottom-left-radius:4px}
+.chatLog{align-self:center;max-width:95%;font-size:11px;color:var(--mu);background:none;padding:1px 4px;text-align:center}
 #chatForm{display:flex;gap:6px;padding:8px;border-top:1px solid var(--bd)}
 #chatInput{min-width:0;flex:1}
 #chatForm button{flex:none}
@@ -108,7 +108,6 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
   <div id="opf" class="base"><div class="sy" id="osy" style="left:6px"></div></div>
   <div id="bf"><div class="band">Area 5</div><div class="band">Area 4</div><div class="band">Area 3</div><div class="band">Area 2</div><div class="band">Area 1</div></div>
   <div id="myf" class="base"><div class="sy" id="msy" style="right:6px"></div></div>
-  <div id="log"></div>
   <div id="hand"></div>
  </div>
  <aside id="sideCol">
@@ -127,6 +126,11 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
    <button data-a="coin">Coin flip</button>
    <button data-a="restart">Restart</button>
   </div>
+  <section id="chatPanel" aria-label="Game chat">
+   <div id="chatHead"><span>Chat</span></div>
+   <div id="chatMessages" aria-live="polite"></div>
+   <form id="chatForm"><input id="chatInput" maxlength="500" autocomplete="off" placeholder="Type a message…" aria-label="Message"><button class="p" type="submit">Send</button></form>
+  </section>
  </aside>
 <svg id="arrows"></svg>
 </section>
@@ -134,11 +138,6 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 <div id="rv"></div>
 <div id="pv"></div>
 <div id="modal"></div>
-<section id="chatPanel" aria-label="Game chat">
- <div id="chatHead"><span>Chat</span></div>
- <div id="chatMessages" aria-live="polite"></div>
- <form id="chatForm"><input id="chatInput" maxlength="500" autocomplete="off" placeholder="Type a message…" aria-label="Message"><button class="p" type="submit">Send</button></form>
-</section>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
@@ -213,7 +212,7 @@ function mull(){const S={},ui=()=>{const ids=Object.keys(S),n=ids.length;
 const pub=()=>({n:name,vp:me.vp,h:me.hand.length,m:me.main.length,e:me.energy.length,s:me.spec.length,d:me.discard.map(c=>({name:c.name,type:c.type})),x:me.exile.map(c=>({name:c.name,type:c.type})),ar:me.arrows,f:me.field.map(c=>({id:c.id,type:c.type,a:c.a,x:c.x,y:c.y,tap:c.tap,fd:c.fd,z:c.z,dm:c.dm,sd:c.sd,en:c.en,lk:c.lk,st:c.st,name:c.fd?'?':c.name}))});
 const send=o=>{if(link&&link.readyState=='open')link.send(JSON.stringify(o))};
 const sync=()=>send({t:'s',s:pub()});
-function addlog(m){const l=$('#log');l.insertAdjacentHTML('beforeend',`<div>${esc(m)}</div>`);l.scrollTop=l.scrollHeight}
+function addlog(m){const l=$('#chatMessages');if(!l)return;const d=document.createElement('div');d.className='chatBubble chatLog';d.textContent=m;l.append(d);l.scrollTop=l.scrollHeight}
 function log(m){m=name+' '+m;addlog(m);send({t:'l',m})}
 const upd=()=>{closeMenu();render();sync()};
 
