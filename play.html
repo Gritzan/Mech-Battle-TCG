@@ -20,6 +20,10 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 #arrows{position:absolute;top:0;left:0;pointer-events:none;z-index:500}
 #tgtbar{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:10002;background:var(--ac);color:#fff;padding:7px 14px;border-radius:10px;display:none;gap:10px;align-items:center;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #tgtbar button{background:#fff;color:var(--ac);border:none;font-weight:700;border-radius:6px;padding:3px 9px}
+#passBtn{font-size:17px;font-weight:800;padding:14px 10px;border-radius:10px;background:#16a34a;color:#fff;border:none;box-shadow:0 2px 6px rgba(0,0,0,.25);letter-spacing:.02em}
+#passBtn:hover:not(:disabled){background:#15803d;border-color:#15803d}
+#passBtn:disabled{background:var(--fl);color:var(--mu);box-shadow:none;cursor:default}
+#fp{text-align:center;font-weight:700;padding:2px 0 0}
 .box{max-width:860px;margin:0 auto;padding:16px}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 .two textarea{height:110px;margin:6px 0;font-size:11px}
@@ -113,6 +117,8 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
  <aside id="sideCol">
   <div id="opbar" class="bar side"></div>
   <div id="mybar" class="bar side">
+   <button id="passBtn" class="pass" data-a="pass" disabled>Pass Turn</button>
+   <span id="fp"></span>
    <span>Deck <b id="nm"></b> <button data-a="draw">Draw</button> <input id="dn" type="number" value="1" min="1" max="40" title="Cards to draw"> <button data-a="shuf">Shuffle</button></span>
    <span>Look at top <input id="kn" type="number" value="3" min="1" max="40"> <button data-a="vm">Look</button></span>
    <span>Energy <b id="ne"></b> <button data-a="en">Put in field</button> <button data-a="she">Shuffle</button></span>
@@ -122,7 +128,6 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
    <span>Removed <b id="nx"></b> <button data-a="vx">View</button></span>
    <button data-a="drone">+ Token</button>
    <span>VP <button data-a="vp0">−</button> <b id="vp"></b> <button data-a="vp1">+</button> / 5</span>
-   <span id="fp"></span>
    <button data-a="coin">Coin flip</button>
    <button data-a="restart">Restart</button>
   </div>
@@ -147,7 +152,7 @@ const BW=52,BH=74,R=100,ZN=['hand','field','discard','exile','main','energy','sp
 const SEC={mech:'mech',commander:'cmd',comandante:'cmd',mothership:'mother','nave-mãe':'mother',energy:'energy',energia:'energy','energy deck':'energy',spec:'spec','spec parts':'spec','spec parts deck':'spec',deck:'deck','main deck':'deck'};
 const NEED={mech:1,cmd:1,mother:1,energy:10,spec:5,deck:40};
 const PID=Math.random().toString(36).slice(2,8)+'_';
-let META={},peer,me,opp,link,pc,decks,name='Player',uid=0,zc=1,lt=0,dg=0,BF={},rl,orl,first,arrowFrom=null,actr=0;
+let META={},peer,me,opp,link,pc,decks,name='Player',uid=0,zc=1,lt=0,dg=0,BF={},rl,orl,first,arrowFrom=null,actr=0,turnOwner=null,myFirstTurnDone=false,mulDone=false,oppMulDone=false;
 const show=id=>document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==id));
 
 function receiveChat(text,mine){
@@ -179,14 +184,14 @@ const CT={dm:['Damage','#ef4444',''],sd:['Stability Damage','#16a34a',''],en:['E
  CK={mech:['dm','sd','lk','st'],mother:['dm','lk','st'],drone:['dm','lk','st'],cmd:['st'],spec:['en','st'],part:['en','st'],action:['st'],deck:['en','st']};
 const cl=v=>Math.max(0,Math.min(1,v)),ROW={cmd:0,spec:0,deck:0,energy:1,gen:1};
 function put(c,fd){c.fd=fd?1:0;c.tap=0;c.z=++zc;
- if(MOV[c.type]){c.a=1;c.y=0;c.x=Math.min(1,.05+me.field.filter(f=>f.a==1).length*.1)}
+ if(MOV[c.type]){c.a=1;c.y=0;const n=me.field.filter(f=>f.a==1).length,total=n+1,start=.5-(total-1)*.05;c.x=cl(start+n*.1)}
  else{c.a=0;c.y=ROW[c.type]??0;c.x=Math.min(1,me.field.filter(f=>f.a==0&&f.y==c.y).length*.07)}
  me.field.push(c)}
 function newGame(){const D=decks;
  me={vp:0,hand:[],field:[],discard:[],exile:[],arrows:[],main:D.deck.map(n=>mk(n,mty(n),'main')),energy:D.energy.map(n=>mk(n,'energy','energy')),spec:D.spec.map(n=>mk(n,'spec','spec'))};
  shuf(me.main);shuf(me.energy);
  ['mech','mother','cmd'].forEach(k=>D[k][0]&&put(mk(D[k][0],k,'core'),0));
- rl=orl=first=null;$('#fp').textContent='';upd();rollUI()}
+ rl=orl=first=null;turnOwner=null;myFirstTurnDone=false;mulDone=false;oppMulDone=false;$('#fp').textContent='';if($('#passBtn')){$('#passBtn').disabled=true;$('#passBtn').textContent='Pass Turn'}upd();rollUI()}
 function mv(id,to,pos){let f,i=-1;for(f of ZN){i=me[f].findIndex(c=>c.id==id);if(i>=0)break}
  if(i<0)return;const c=me[f].splice(i,1)[0];c.fd=0;c.tap=0;c.dm=c.sd=c.en=c.lk=0;
  if(c.src=='token'&&to!='field'){}else if(to=='field')put(c,pos);else if(to=='hand'||pos=='bottom')me[to].push(c);else me[to].unshift(c);
@@ -207,7 +212,17 @@ function afterPick(){$('#fp').textContent=first?'You go first':'Opponent goes fi
 function mull(){const S={},ui=()=>{const ids=Object.keys(S),n=ids.length;
  modal('Mulligan',me.hand.map(c=>({t:c.name,c,b:[[S[c.id]?'✔ return':'return',()=>{if(S[c.id])delete S[c.id];else if(n<2)S[c.id]=1;ui()}]]})),
  [[n?`Return ${n} and draw ${n}`:'Keep hand',()=>{ids.forEach(id=>me.main.push(me.hand.splice(me.hand.findIndex(c=>c.id==id),1)[0]));
-  for(let i=0;i<n&&me.main.length;i++)me.hand.push(me.main.shift());if(n)log(`mulliganed ${n} card(s)`);upd();$('#modal').style.display='none'}]],1,'Return up to 2 cards to the bottom of your deck; you draw the same number.')};ui()}
+  for(let i=0;i<n&&me.main.length;i++)me.hand.push(me.main.shift());if(n)log(`mulliganed ${n} card(s)`);upd();$('#modal').style.display='none';finishMulligan()}]],1,'Return up to 2 cards to the bottom of your deck; you draw the same number.')};ui()}
+
+function finishMulligan(){mulDone=true;send({t:'mul'});checkStart()}
+function checkStart(){if(!mulDone)return;if(!link)oppMulDone=true;if(!(mulDone&&oppMulDone))return;
+ if(first)becomeActive();else{turnOwner='opp';turnUI()}}
+function turnUI(){const b=$('#fp');if(b)b.textContent=turnOwner=='me'?'Your turn':turnOwner=='opp'?"Opponent's turn":(first==null?'':(first?'You go first':'Opponent goes first'));
+ const pb=$('#passBtn');if(pb){pb.disabled=turnOwner!='me';if(turnOwner=='me')pb.textContent='Pass Turn'}}
+function untapForTurn(){me.field.forEach(c=>{if(c.st){if(c.tap)c.st=0}else c.tap=0})}
+function drawAndEnergy(firstEver){if(me.main.length){me.hand.push(me.main.shift());log('drew a card')}else log('tried to draw from an empty deck');
+ const n=firstEver?2:1;for(let i=0;i<n;i++){const c=me.energy[0];if(c){log(`put ${c.name} into the field`);mv(c.id,'field')}}}
+function becomeActive(){const firstEver=!myFirstTurnDone;turnOwner='me';untapForTurn();drawAndEnergy(firstEver);myFirstTurnDone=true;turnUI();upd()}
 
 const pub=()=>({n:name,vp:me.vp,h:me.hand.length,m:me.main.length,e:me.energy.length,s:me.spec.length,d:me.discard.map(c=>({name:c.name,type:c.type})),x:me.exile.map(c=>({name:c.name,type:c.type})),ar:me.arrows,f:me.field.map(c=>({id:c.id,type:c.type,a:c.a,x:c.x,y:c.y,tap:c.tap,fd:c.fd,z:c.z,dm:c.dm,sd:c.sd,en:c.en,lk:c.lk,st:c.st,name:c.fd?'?':c.name}))});
 const send=o=>{if(link&&link.readyState=='open')link.send(JSON.stringify(o))};
@@ -345,7 +360,11 @@ const H={
  vp1(){me.vp++;if(me.vp==5)log('reached 5 VP and won the game!');upd()},vp0(){me.vp=Math.max(0,me.vp-1);upd()},
  coin(){log('coin flip: '+(Math.random()<.5?'heads':'tails'))},
  od(){modal('Opponent Scrapyard',lst(opp&&opp.d).map(oc))},ox(){modal('Removed from game (opponent)',lst(opp&&opp.x).map(oc))},
- restart(e){const b=e.target;if(b.dataset.s){delete b.dataset.s;b.textContent='Restart';send({t:'x'});return newGame()}b.dataset.s=1;b.textContent='Confirm?';setTimeout(()=>{delete b.dataset.s;b.textContent='Restart'},3000)}};
+ restart(e){const b=e.target;if(b.dataset.s){delete b.dataset.s;b.textContent='Restart';send({t:'x'});return newGame()}b.dataset.s=1;b.textContent='Confirm?';setTimeout(()=>{delete b.dataset.s;b.textContent='Restart'},3000)},
+ pass(){if(turnOwner!='me')return;
+  if(!link){log('(solo) ends the turn');becomeActive();return}
+  $('#passBtn').disabled=true;$('#passBtn').textContent='Waiting for opponent…';send({t:'passReq'})}};
+function passReqUI(){modal('Opponent wants to end their turn',[],[['Play a Reaction',()=>{send({t:'passResp',end:0});$('#modal').style.display='none'}],['Let it end',()=>{send({t:'passResp',end:1});$('#modal').style.display='none'}]],1,'You can still act on your own cards before you answer.')}
 document.querySelectorAll('.bar').forEach(b=>b.onclick=e=>{const a=e.target.dataset.a;if(a&&H[a])H[a](e)});
 $('#tgtcancel').onclick=cancelTarget;
 $('#msy').onclick=()=>me&&pile('discard');$('#osy').onclick=H.od;
@@ -364,7 +383,7 @@ $('#go').onclick=()=>{const{L,err}=parse($('#dl').value);name=$('#pn').value.tri
 function start(){show('game');if(!me)newGame();else{render();sync()}}
 const rid=()=>Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
 function onMsg(raw){let m;try{m=typeof raw=='string'?JSON.parse(raw):raw}catch{return}if(!m)return;
- if(m.t=='s'){opp=m.s;renderOpp()}else if(m.t=='chat'&&typeof m.m=='string')receiveChat(m.m.slice(0,500),false);else if(m.t=='l')addlog(m.m);else if(m.t=='r'){orl=Math.min(20,Math.max(1,+m.v|0));resolve()}else if(m.t=='f'){first=!m.w;afterPick()}else if(m.t=='x')newGame();else if(m.t=='v'&&m.c&&typeof m.c=='object')showRv(m.c,opp?String(opp.n).slice(0,24):'Opponent')}
+ if(m.t=='s'){opp=m.s;renderOpp()}else if(m.t=='chat'&&typeof m.m=='string')receiveChat(m.m.slice(0,500),false);else if(m.t=='l')addlog(m.m);else if(m.t=='r'){orl=Math.min(20,Math.max(1,+m.v|0));resolve()}else if(m.t=='f'){first=!m.w;afterPick()}else if(m.t=='x')newGame();else if(m.t=='v'&&m.c&&typeof m.c=='object')showRv(m.c,opp?String(opp.n).slice(0,24):'Opponent');else if(m.t=='mul'){oppMulDone=true;checkStart()}else if(m.t=='passReq')passReqUI();else if(m.t=='passResp'){if(m.end){turnOwner='opp';turnUI();log('ended their turn');send({t:'turnYours'})}else{$('#passBtn').disabled=false;$('#passBtn').textContent='Pass Turn';log('wants to play a Reaction')}}else if(m.t=='turnYours')becomeActive()}
 function wire(c){link={get readyState(){return c.open?'open':'closed'},send:s=>c.send(s)};
  const go=()=>{$('#st').textContent='Connected!';start()};c.open?go():c.on('open',go);
  c.on('data',onMsg);c.on('close',()=>addlog('Connection closed.'));c.on('error',e=>addlog('Connection error: '+e.type))}
