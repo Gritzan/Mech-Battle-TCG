@@ -185,7 +185,7 @@ const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&'
 // Audio effects are loaded from the repository's audio/ folder. Missing files fail silently.
 const SFX_NAMES=['card_tap','card_untap','card_move','card_enter_field','card_leave_field','card_draw','deck_shuffle','button_click','pass_turn','create_arrow'];
 const SFX=Object.fromEntries(SFX_NAMES.map(name=>{const audio=new Audio('audio/'+name+'.ogg');audio.preload='auto';return[name,audio]}));
-function playSfx(name){const source=SFX[name];if(!source)return;const audio=source.cloneNode();audio.volume=.55;audio.play().catch(()=>{});}
+function playSfx(name){const source=SFX[name];if(!source)return;const audio=source.cloneNode();audio.volume=.4;audio.play().catch(()=>{});}
 document.addEventListener('click',e=>{const button=e.target.closest('button');if(!button)return;if(['draw','shuf','she','pass','en'].includes(button.dataset.a)||button.dataset.sfx==='special')return;playSfx('button_click')});
 const TY={mech:['Mech','#ef4444'],cmd:['Commander','#a855f7'],mother:['Mothership','#0ea5e9'],energy:['Energy','#eab308'],spec:['Spec Part','#22c55e'],deck:['Card','#94a3b8'],part:['Part','#10b981'],action:['Action','#f97316'],drone:['Drone','#14b8a6'],gen:['Generic Energy','#f59e0b']};
 const BW=52,BH=74,R=100,ZN=['hand','field','discard','exile','main','energy','spec'],MOV={mech:1,mother:1,drone:1};
