@@ -58,6 +58,9 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 #bf{flex:1 0 300px;position:relative;display:grid;grid-template-rows:repeat(5,1fr);overflow:hidden}
 .band{padding:1px 6px;font-size:10px;color:var(--mu);border-bottom:1px dashed var(--bd)} .band:nth-child(odd){background:rgba(127,127,127,.09)}
 .sy{position:absolute;top:6px;bottom:6px;width:88px;border:1px dashed var(--ac);border-radius:6px;padding:4px;font-size:11px;cursor:pointer;overflow:hidden;background:var(--pn);z-index:1}
+.rollBox{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:12px;background:var(--pn);border:3px solid var(--ac);display:none;align-items:center;justify-content:center;font-size:28px;font-weight:800;z-index:6;box-shadow:0 4px 16px rgba(0,0,0,.35);transition:border-color .2s,color .2s,background .2s}
+.rollBox.on{display:flex}
+.rollBox.win{border-color:#16a34a;color:#16a34a;background:#f0fdf4}
 .mn{position:absolute;top:0;right:0;width:18px;height:16px;text-align:center;text-decoration:none;background:var(--ac);color:#fff;border-radius:0 3px 0 6px;cursor:pointer;font-size:11px;line-height:16px}
 .c.opp{cursor:default!important} .c.mine{cursor:grab} #hand .c{cursor:pointer}
 .bd{position:absolute;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:1px;padding:1px}
@@ -142,9 +145,9 @@ input[type=number]{width:52px;padding:3px} input[type=checkbox]{width:auto}
 
 <section id="game" class="scr">
  <div id="mainCol">
-  <div id="opf" class="base"><div class="sy" id="osy" style="left:6px"></div></div>
+  <div id="opf" class="base"><div class="sy" id="osy" style="left:6px"></div><div class="rollBox" id="rollOpp"></div></div>
   <div id="bf"><div class="band">Area 5</div><div class="band">Area 4</div><div class="band">Area 3</div><div class="band">Area 2</div><div class="band">Area 1</div></div>
-  <div id="myf" class="base"><div class="sy" id="msy" style="right:6px"></div></div>
+  <div id="myf" class="base"><div class="sy" id="msy" style="right:6px"></div><div class="rollBox" id="rollMe"></div></div>
   <div id="hand"></div>
  </div>
  <aside id="sideCol">
@@ -224,22 +227,30 @@ function newGame(){const D=decks;
  me={vp:0,hand:[],field:[],discard:[],exile:[],arrows:[],main:D.deck.map(n=>mk(n,mty(n),'main')),energy:D.energy.map(n=>mk(n,'energy','energy')),spec:D.spec.map(n=>mk(n,'spec','spec'))};
  shuf(me.main);shuf(me.energy);
  ['mech','mother','cmd'].forEach(k=>D[k][0]&&put(mk(D[k][0],k,'core'),0));
- rl=orl=first=null;turnOwner=null;myFirstTurnDone=false;mulDone=false;oppMulDone=false;$('#fp').textContent='';if($('#passBtn')){$('#passBtn').disabled=true;$('#passBtn').textContent='Pass Turn'}upd();rollUI()}
+ rl=orl=first=null;turnOwner=null;myFirstTurnDone=false;mulDone=false;oppMulDone=false;$('#fp').textContent='';hideRollBoxes();if($('#passBtn')){$('#passBtn').disabled=true;$('#passBtn').textContent='Pass Turn'}upd();rollUI()}
 function mv(id,to,pos){let f,i=-1;for(f of ZN){i=me[f].findIndex(c=>c.id==id);if(i>=0)break}
  if(i<0)return;const c=me[f].splice(i,1)[0];c.fd=0;c.tap=0;c.dm=c.sd=c.en=c.lk=0;
  if(c.src=='token'&&to!='field'){}else if(to=='field')put(c,pos);else if(to=='hand'||pos=='bottom')me[to].push(c);else me[to].unshift(c);
  upd()}
 
 function rollUI(){modal('Who goes first?',[],[['Roll d20',doRoll]],1,'Each player rolls a d20. The winner chooses whether to go first.')}
-function doRoll(){rl=1+Math.random()*20|0;log(`rolled ${rl} on the d20`);send({t:'r',v:rl});if(!link){orl=1+Math.random()*20|0;addlog(`Opponent (simulated) rolled ${orl}`)}resolve()}
+function animateRoll(sel,final,dur,cb){const el=$(sel);if(!el)return cb();
+ el.classList.remove('win');el.classList.add('on');
+ const iv=setInterval(()=>{el.textContent=1+Math.random()*20|0},70);
+ setTimeout(()=>{clearInterval(iv);el.textContent=final;cb()},dur)}
+function hideRollBoxes(){['#rollMe','#rollOpp'].forEach(s=>{const el=$(s);if(el)el.classList.remove('on','win')})}
+function doRoll(){$('#modal').style.display='none';const v=1+Math.random()*20|0;
+ animateRoll('#rollMe',v,1500,()=>{rl=v;log(`rolled ${rl} on the d20`);send({t:'r',v:rl});
+  if(!link){const ov=1+Math.random()*20|0;animateRoll('#rollOpp',ov,1500,()=>{orl=ov;addlog(`Opponent (simulated) rolled ${orl}`);resolve()})}
+  resolve()})}
 function resolve(){if(rl==null)return;
  if(orl==null)return modal('Waiting for the opponent to roll…',[],0,1,`You rolled ${rl}.`);
- if(rl==orl){rl=orl=null;addlog('Tie! Roll again.');return rollUI()}
- if(rl>orl)modal(`You won the roll (${rl} × ${orl})`,[],[['Go first',()=>pick(1)],['Go second',()=>pick(0)]],1,'The player going second starts with 1 Generic Energy token.');
- else if(!link){first=false;afterPick()}
- else modal(`Opponent won the roll (${orl} × ${rl})`,[],0,1,'Waiting for their choice…')}
+ if(rl==orl){addlog('Tie! Rolling again…');rl=orl=null;setTimeout(doRoll,600);return}
+ if(rl>orl){$('#rollMe').classList.add('win');modal(`You won the roll (${rl} × ${orl})`,[],[['Go first',()=>pick(1)],['Go second',()=>pick(0)]],1,'The player going second starts with 1 Generic Energy token.')}
+ else if(!link){first=false;$('#rollOpp').classList.add('win');afterPick()}
+ else{$('#rollOpp').classList.add('win');modal(`Opponent won the roll (${orl} × ${rl})`,[],0,1,'Waiting for their choice…')}}
 function pick(w){first=!!w;send({t:'f',w:w?1:0});afterPick()}
-function afterPick(){$('#fp').textContent=first?'You go first':'Opponent goes first';
+function afterPick(){hideRollBoxes();$('#fp').textContent=first?'You go first':'Opponent goes first';
  if(first)log('goes first');else{put(mk('Generic Energy','gen','token'),0);log('goes second and receives 1 Generic Energy')}
  upd();pile('spec',()=>{for(let i=0;i<5&&me.main.length;i++)me.hand.push(me.main.shift());upd();mull()})}
 function mull(){const S={},ui=()=>{const ids=Object.keys(S),n=ids.length;
@@ -253,9 +264,12 @@ function checkStart(){if(!mulDone)return;if(!link)oppMulDone=true;if(!(mulDone&&
 function turnUI(){const b=$('#fp');if(b)b.textContent=turnOwner=='me'?'Your turn':turnOwner=='opp'?"Opponent's turn":(first==null?'':(first?'You go first':'Opponent goes first'));
  const pb=$('#passBtn');if(pb){pb.disabled=turnOwner!='me';if(turnOwner=='me')pb.textContent='Pass Turn'}}
 function untapForTurn(){me.field.forEach(c=>{if(c.st){if(c.tap)c.st=0}else c.tap=0})}
-function drawAndEnergy(firstEver){if(me.main.length){me.hand.push(me.main.shift());log('drew a card')}else log('tried to draw from an empty deck');
- const n=firstEver?2:1;for(let i=0;i<n;i++){const c=me.energy[0];if(c){log(`put ${c.name} into the field`);mv(c.id,'field')}}}
-function becomeActive(){const firstEver=!myFirstTurnDone;turnOwner='me';untapForTurn();drawAndEnergy(firstEver);myFirstTurnDone=true;turnUI();upd()}
+function drawCard(){if(me.main.length){me.hand.push(me.main.shift());log('drew a card')}else log('tried to draw from an empty deck')}
+function giveEnergy(n){for(let i=0;i<n;i++){const c=me.energy[0];if(c){log(`put ${c.name} into the field`);mv(c.id,'field')}}}
+function becomeActive(){turnOwner='me';untapForTurn();turnUI();upd();
+ setTimeout(()=>{drawCard();upd();
+  setTimeout(()=>{const firstEver=!myFirstTurnDone;giveEnergy(firstEver?2:1);myFirstTurnDone=true;turnUI();upd()},300)
+ },300)}
 
 const pub=()=>({n:name,vp:me.vp,h:me.hand.length,m:me.main.length,e:me.energy.length,s:me.spec.length,d:me.discard.map(c=>({name:c.name,type:c.type})),x:me.exile.map(c=>({name:c.name,type:c.type})),ar:me.arrows,f:me.field.map(c=>({id:c.id,type:c.type,a:c.a,x:c.x,y:c.y,tap:c.tap,fd:c.fd,z:c.z,dm:c.dm,sd:c.sd,en:c.en,lk:c.lk,st:c.st,name:c.fd?'?':c.name}))});
 const send=o=>{if(link&&link.readyState=='open')link.send(JSON.stringify(o))};
@@ -416,7 +430,7 @@ $('#go').onclick=()=>{const{L,err}=parse($('#dl').value);name=$('#pn').value.tri
 function start(){show('game');if(!me)newGame();else{render();sync()}}
 const rid=()=>Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
 function onMsg(raw){let m;try{m=typeof raw=='string'?JSON.parse(raw):raw}catch{return}if(!m)return;
- if(m.t=='s'){opp=m.s;renderOpp()}else if(m.t=='chat'&&typeof m.m=='string')receiveChat(m.m.slice(0,500),false);else if(m.t=='l')addlog(m.m);else if(m.t=='r'){orl=Math.min(20,Math.max(1,+m.v|0));resolve()}else if(m.t=='f'){first=!m.w;afterPick()}else if(m.t=='x')newGame();else if(m.t=='v'&&m.c&&typeof m.c=='object')showRv(m.c,opp?String(opp.n).slice(0,24):'Opponent');else if(m.t=='mul'){oppMulDone=true;checkStart()}else if(m.t=='passReq')passReqUI();else if(m.t=='passResp'){if(m.end){turnOwner='opp';turnUI();log('ended their turn');send({t:'turnYours'})}else{$('#passBtn').disabled=false;$('#passBtn').textContent='Pass Turn';log('wants to play a Reaction')}}else if(m.t=='turnYours')becomeActive()}
+ if(m.t=='s'){opp=m.s;renderOpp()}else if(m.t=='chat'&&typeof m.m=='string')receiveChat(m.m.slice(0,500),false);else if(m.t=='l')addlog(m.m);else if(m.t=='r'){const v=Math.min(20,Math.max(1,+m.v|0));animateRoll('#rollOpp',v,1500,()=>{orl=v;resolve()})}else if(m.t=='f'){first=!m.w;afterPick()}else if(m.t=='x')newGame();else if(m.t=='v'&&m.c&&typeof m.c=='object')showRv(m.c,opp?String(opp.n).slice(0,24):'Opponent');else if(m.t=='mul'){oppMulDone=true;checkStart()}else if(m.t=='passReq')passReqUI();else if(m.t=='passResp'){if(m.end){turnOwner='opp';turnUI();log('ended their turn');send({t:'turnYours'})}else{$('#passBtn').disabled=false;$('#passBtn').textContent='Pass Turn';log('wants to play a Reaction')}}else if(m.t=='turnYours')becomeActive()}
 function wire(c){link={get readyState(){return c.open?'open':'closed'},send:s=>c.send(s)};
  const go=()=>{$('#st').textContent='Connected!';start()};c.open?go():c.on('open',go);
  c.on('data',onMsg);c.on('close',()=>addlog('Connection closed.'));c.on('error',e=>addlog('Connection error: '+e.type))}
